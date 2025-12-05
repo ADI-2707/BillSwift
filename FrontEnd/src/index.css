@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+body {
+  margin: 10px;
+  background: linear-gradient(45deg, #011107, #000000);;
+  color: white;
+  position: relative;
+}
+
+.nav_link {
+  position: relative;
+  padding: 6px 10px;
+  transition: .25s ease;
+}
+
+.nav_link::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #16a34a;
+  transition: width .25s ease;
+}
+
+.nav_link:hover::after {
+  width: 100%;
+}
+
+.mobile_menu_enter {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.mobile_menu_enter_active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all .3s ease;
+}
