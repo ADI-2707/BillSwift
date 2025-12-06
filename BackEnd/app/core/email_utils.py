@@ -2,13 +2,11 @@ import smtplib
 import pathlib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
 from app.core.config import settings
 from app.models.user import User
 
 # Path to templates folder
 TEMPLATE_PATH = pathlib.Path(__file__).parent / "email_templates"
-
 
 def render_template(template_name: str, **kwargs) -> str:
     """Load HTML template and replace placeholders."""
@@ -22,7 +20,6 @@ def render_template(template_name: str, **kwargs) -> str:
         html = html.replace(f"{{{{{key}}}}}", str(value))
 
     return base_html.replace("{{content}}", html)
-
 
 def _send_email(to_email: str, subject: str, html: str) -> None:
     """Send HTML email using SMTP or print when config missing."""
@@ -53,7 +50,6 @@ def _send_email(to_email: str, subject: str, html: str) -> None:
         print("Failed HTML:")
         print(html)
 
-
 def send_new_user_request_email(user: User) -> None:
     """Notify ADMIN — A new user has registered"""
     if not settings.ADMIN_EMAIL:
@@ -71,14 +67,12 @@ def send_new_user_request_email(user: User) -> None:
     _send_email(settings.ADMIN_EMAIL,
                 "🚨 New User Signup | BillSwift", html)
 
-
 def send_user_signup_ack_email(user: User) -> None:
     """Notify USER — Registration Received"""
     html = render_template("signup_ack.html", name=user.first_name)
 
     _send_email(user.email,
                 "✔ Registration Received | BillSwift", html)
-
 
 def send_user_approved_email(user: User) -> None:
     """Notify USER — Approved"""

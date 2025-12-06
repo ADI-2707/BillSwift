@@ -8,7 +8,6 @@ class UserCreate(BaseModel):
     team: str
     password: str
 
-
 class UserOut(BaseModel):
     id: int
     first_name: str
@@ -21,7 +20,6 @@ class UserOut(BaseModel):
     model_config = {
         "from_attributes": True
     }
-
 
 class LoginRequest(BaseModel):
     email: EmailStr

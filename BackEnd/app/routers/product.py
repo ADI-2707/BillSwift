@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.product import Product
-from app.schemas.product import ProductCreate, ProductOut
+from app.schemas.product import ProductCreate, ProductOut, ProductUpdate
 from app.auth.jwt_handler import get_current_user, require_admin
 
 router = APIRouter(prefix="/products", tags=["Products"])
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/products", tags=["Products"])
 def create_product(
     payload: ProductCreate,
     db: Session = Depends(get_db),
-    _: str = Depends(require_admin),
+    _: dict = Depends(require_admin),
 ):
     product = Product(**payload.model_dump())
     db.add(product)
@@ -61,16 +61,17 @@ def list_products(
 @router.put("/{product_id}", response_model=ProductOut)
 def update_product(
     product_id: int,
-    payload: ProductCreate,
+    payload: ProductUpdate,
     db: Session = Depends(get_db),
-    _: str = Depends(require_admin),
+    _: dict = Depends(require_admin),
 ):
     product = db.query(Product).filter(Product.id == product_id).first()
 
     if not product:
         raise HTTPException(404, "Product not found")
 
-    for key, value in payload.model_dump().items():
+    update_data = payload.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(product, key, value)
 
     db.commit()
@@ -82,7 +83,7 @@ def update_product(
 def delete_product(
     product_id: int,
     db: Session = Depends(get_db),
-    _: str = Depends(require_admin),
+    _: dict = Depends(require_admin),
 ):
     product = db.query(Product).filter(Product.id == product_id).first()
 

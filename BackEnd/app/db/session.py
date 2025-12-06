@@ -15,7 +15,6 @@ SessionLocal = sessionmaker(
     future=True
 )
 
-
 def get_db():
     """
     Dependency for FastAPI routes.

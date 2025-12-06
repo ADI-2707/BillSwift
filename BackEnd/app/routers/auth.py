@@ -9,6 +9,9 @@ from app.core.email_utils import (
     send_new_user_request_email,
     send_user_signup_ack_email,
 )
+from app.auth.jwt_handler import get_current_user
+from app.schemas.user import UserOut
+from fastapi import Depends
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -45,6 +48,7 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login")
 def login(payload: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
+
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
@@ -55,4 +59,9 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         )
 
     token = create_access_token(user)
-    return {"access_token": token, "token_type": "bearer"}
+    
+    return {"access_token": token, "token_type": "bearer", "role": user.role, "email": user.email}
+
+@router.get("/me", response_model=UserOut)
+def get_my_profile(current_user: User = Depends(get_current_user)):
+    return current_user

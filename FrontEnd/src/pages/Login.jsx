@@ -26,33 +26,35 @@ const Login = () => {
     }
 
     try {
-      const { data } = await axios.post(`${API_URL}/auth/login`, form);
+      const res = await axios.post(`${API_URL}/auth/login`, {
+        email: form.email,
+        password: form.password,
+      });
 
-      // Store token + user role from backend response
-      localStorage.setItem("token", data.access_token);
-      localStorage.setItem("role", data.role);
+      // Store token + user role in storage
+      localStorage.setItem("token", res.data.access_token);
+      localStorage.setItem("role",res.data.role);
+      localStorage.setItem("userEmail", res.data.email);
 
-      // Navigate based on role
-      if (data.role === "admin") {
+      // Navigate admin → admin panel, others → bill page
+      if (res.data.role === "admin") {
         navigate("/admin");
       } else {
-        navigate("/home");
+        navigate("/");
       }
     } catch (err) {
-      // Show detailed backend message
       setError(err.response?.data?.detail || "⚠️ Login failed");
     }
   };
 
   return (
-    <div className="flex flex-col justify-center items-center gap-10 min-h-screen">
-      <h1 className="text-5xl font-bold mt-5">
-        Login to your{" "}
-        <span className="text-red-600">B</span>ill
+    <div className="flex flex-col justify-center items-center gap-5 mt-20">
+      <h1 className="text-5xl font-bold">
+        Login to your <span className="text-red-600">B</span>ill
         <span className="text-red-600">Swift</span> account
       </h1>
 
-      <div className="flex flex-col gap-4 items-center backdrop-blur-md bg-white/2 border border-green-900/60 rounded-xl px-6 py-6 w-full max-w-md mt-10">
+      <div className="flex flex-col gap-4 items-center backdrop-blur-md bg-white/2 border border-green-900/60 rounded-xl px-6 py-6 w-full max-w-md mt-15">
         <h1 className="text-lg font-bold text-white">
           <span className="text-green-500">L</span>OGIN
         </h1>
@@ -113,4 +115,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;

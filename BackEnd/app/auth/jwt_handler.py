@@ -3,7 +3,6 @@ from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-
 from app.db.session import get_db
 from app.models.user import User
 
@@ -14,7 +13,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-
 def create_access_token(user: User):
     payload = {
         "sub": user.email,
@@ -23,7 +21,6 @@ def create_access_token(user: User):
         "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
-
 
 def decode_token(token: str):
     """
@@ -38,7 +35,6 @@ def decode_token(token: str):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token invalid or expired",
         )
-
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
@@ -66,7 +62,6 @@ def get_current_user(
         )
 
     return user
-
 
 def require_admin(current_user: User = Depends(get_current_user)):
     """

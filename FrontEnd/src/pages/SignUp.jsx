@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { usersDB } from "../data/dummyData";
+import axios from "axios";
+
+const API_URL = "http://127.0.0.1:8000";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -8,6 +10,7 @@ const Signup = () => {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
+    employee_code: "",
     team: "",
     email: "",
     password: "",
@@ -18,63 +21,55 @@ const Signup = () => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError("");
   };
 
-  const handleSignup = () => {
-    const { firstName, lastName, team, email, password, confirmPassword } = form;
+  const handleSignup = async () => {
+    const { firstName, lastName, employee_code, team, email, password, confirmPassword } = form;
 
-    // Basic validation
-    if (!firstName || !lastName || !team || !email || !password || !confirmPassword) {
-      setError("Please fill out all fields.");
-      return;
+    if (!firstName || !lastName || !employee_code || !team || !email || !password || !confirmPassword) {
+      return setError("Please fill out all fields.");
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
+      return setError("Passwords do not match.");
     }
 
-    let db = JSON.parse(localStorage.getItem("usersDB")) || usersDB;
+    try {
+      await axios.post(`${API_URL}/auth/signup`, {
+        first_name: firstName,
+        last_name: lastName,
+        employee_code,
+        team,
+        email,
+        password,
+      });
 
-    const exists = db.find(u => u.email === email);
-    if (exists) return setError("⚠️ Email already exists");
-
-    const newUser = {
-      id: Date.now(),
-      firstName,
-      lastName,
-      team,
-      email,
-      password,
-      bills: []
-    };
-
-    db.push(newUser);
-
-    localStorage.setItem("usersDB", JSON.stringify(db));
-
-    alert("Account created successfully!");
-    navigate("/login");
+      alert("Registration sent for approval! Check your email.");
+      navigate("/login");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Signup failed");
+    }
   };
 
   return (
     <>
-      <div className="flex flex-col items-center mt-10 text-center">
+      <div className="flex flex-col items-center mt-20 text-center">
         {/* PAGE HEADING */}
-        <h1 className='text-5xl font-bold mt-5'>Sign up for your <span className='text-red-600'>B</span>ill<span className='text-red-600'>Swift</span> accout</h1>
+        <h1 className="text-5xl font-bold">
+          Sign up for your <span className="text-red-600">B</span>ill
+          <span className="text-red-600">Swift</span> account
+        </h1>
 
         {/* CARD */}
-        <div className="flex flex-col gap-4 items-center border border-green-900/60 bg-white/2 rounded-xl px-6 py-6 w-full max-w-md mt-13">
+        <div className="flex flex-col gap-4 items-center border border-green-900/60 bg-white/2 rounded-xl px-6 py-6 w-full max-w-md mt-20">
           <h1 className="text-lg font-bold text-white">
             <span className="text-green-600 font-bold text-lg">S</span>IGN UP
           </h1>
 
           <p className="text-gray-300 text-sm">
             Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-green-600 font-semibold underline hover:text-green-400"
-            >
+            <Link to="/login" className="text-green-600 font-semibold underline hover:text-green-400">
               Login
             </Link>
           </p>
@@ -94,7 +89,7 @@ const Signup = () => {
               type="text"
               onChange={handleChange}
               placeholder="Enter first name"
-              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 placeholder-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:bg-white focus:text-black"
+              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:bg-white focus:text-black"
             />
           </div>
 
@@ -106,7 +101,19 @@ const Signup = () => {
               type="text"
               onChange={handleChange}
               placeholder="Enter last name"
-              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 placeholder-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:bg-white focus:text-black"
+              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:bg-white focus:text-black"
+            />
+          </div>
+
+          {/* EMPLOYEE CODE */}
+          <div className="flex flex-col w-full gap-2">
+            <label className="text-white text-sm text-start">Employee Code</label>
+            <input
+              name="employee_code"
+              type="text"
+              onChange={handleChange}
+              placeholder="Enter your employee code"
+              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:bg-white focus:text-black"
             />
           </div>
 
@@ -115,13 +122,14 @@ const Signup = () => {
             <label className="text-white text-sm text-start">Team</label>
             <select
               name="team"
+              value={form.team}
               onChange={handleChange}
-              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 placeholder-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:bg-white focus:text-black"
+              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:bg-white focus:text-black"
             >
-              <option value="" disabled selected>Select your team</option>
-              <option>Sales</option>
-              <option>HR</option>
-              <option>Commissioning</option>
+              <option value="">Select your team</option>
+              <option value="Sales">Sales</option>
+              <option value="HR">HR</option>
+              <option value="Commissioning">Commissioning</option>
             </select>
           </div>
 
@@ -133,7 +141,7 @@ const Signup = () => {
               type="email"
               onChange={handleChange}
               placeholder="Enter your email"
-              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 placeholder-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:bg-white focus:text-black"
+              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:bg-white focus:text-black"
             />
           </div>
 
@@ -145,7 +153,7 @@ const Signup = () => {
               type="password"
               onChange={handleChange}
               placeholder="Enter password"
-              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 placeholder-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:bg-white focus:text-black"
+              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:bg-white focus:text-black"
             />
           </div>
 
@@ -157,7 +165,7 @@ const Signup = () => {
               type="password"
               onChange={handleChange}
               placeholder="Re-enter password"
-              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 placeholder-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 focus:bg-white focus:text-black"
+              className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-500 outline-none focus:ring-1 focus:ring-green-500 focus:bg-white focus:text-black"
             />
           </div>
 
@@ -166,7 +174,7 @@ const Signup = () => {
             onClick={handleSignup}
             className="bg-red-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-700 hover:text-white active:scale-95 transition duration-150 mt-2 w-32 cursor-pointer"
           >
-            <p className='active:scale-95 transition-all duration-150'>Sign Up</p>
+            Sign Up
           </button>
         </div>
       </div>

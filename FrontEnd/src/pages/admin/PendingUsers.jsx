@@ -3,18 +3,34 @@ import axios from "axios";
 import { API_URL } from "../../api/base";
 import Sidebar from "../../components/admin/Sidebar";
 import AdminNavbar from "../../components/admin/AdminNavbar";
+import { useNavigate } from "react-router-dom";
 
 const PendingUsers = () => {
+  const navigate = useNavigate();
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (role !== "admin") {
+      navigate("/unauthorized");
+      return;
+    }
+
     const fetchPendingUsers = async () => {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await axios.get(`${API_URL}/users/pending`, {
+        const res = await axios.get(`${API_URL}/admin/users/pending`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -33,7 +49,7 @@ const PendingUsers = () => {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.put(`${API_URL}/users/${id}/approve`, null, {
+      await axios.put(`${API_URL}/admin/users/${id}/approve`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

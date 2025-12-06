@@ -2,7 +2,6 @@ from sqlalchemy import Column, Integer, String, Numeric, Boolean, DateTime, func
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
-
 class Product(Base):
     __tablename__ = "products"
 

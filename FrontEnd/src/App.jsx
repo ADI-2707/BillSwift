@@ -13,6 +13,7 @@ import ProductsAdmin from "./pages/admin/ProductsAdmin";
 import BillsAdmin from "./pages/admin/BillsAdmin";
 import AdminSettings from "./pages/admin/AdminSettings";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Unauthorized from "./pages/Unauthorized";
 
 const App = () => {
   return (
@@ -20,11 +21,11 @@ const App = () => {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/add-bill" element={<AddBill />} />
-        <Route path="/view-bills" element={<ViewBills />} />
+        <Route path="/add-bill" element={<ProtectedRoute><AddBill /></ProtectedRoute>} />
+        <Route path="/view-bills" element={<ProtectedRoute><ViewBills /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/account" element={<Account />} />
+        <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute >} />
         <Route
           path="/admin"
           element={
@@ -65,6 +66,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route path='/unauthorized' element={<Unauthorized />} />
       </Routes>
       <Footer />
     </div>

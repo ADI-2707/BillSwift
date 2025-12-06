@@ -9,6 +9,7 @@ const Navbar = () => {
   // Backend Auth
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
+  const userEmail = localStorage.getItem("email");
 
   const isLoggedIn = () => !!token;
 
@@ -73,9 +74,9 @@ const Navbar = () => {
               {/* Account Circle */}
               <button
                 onClick={() => navigate("/account")}
-                className="flex items-center justify-center h-10 w-10 rounded-full bg-green-600 text-white font-bold cursor-pointer"
+                className="flex items-center justify-center h-10 w-10 rounded-full bg-green-600 text-white font-bold cursor-pointer border border-white"
               >
-                U
+                {userEmail ? userEmail.charAt(0).toUpperCase() : "U"}
               </button>
             </>
           ) : (
