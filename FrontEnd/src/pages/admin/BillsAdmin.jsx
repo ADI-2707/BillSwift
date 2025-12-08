@@ -14,15 +14,11 @@ const BillsAdmin = () => {
   const [bills, setBills] = useState([]);
   const [error, setError] = useState("");
 
-  // Fetch all bills (Admin only)
   const getAllBills = async () => {
     try {
       const res = await axios.get(`${API_URL}/admin/billing/all-bills`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       setBills(res.data || []);
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to load bills!");
@@ -30,29 +26,24 @@ const BillsAdmin = () => {
   };
 
   useEffect(() => {
-    // Redirect if not logged in
     if (!token) {
       navigate("/login");
       return;
     }
-
-    // Redirect if not admin
     if (role !== "admin") {
       navigate("/unauthorized");
       return;
     }
-
     getAllBills();
   }, []);
 
-  // Delete bill
   const deleteBill = async (billId) => {
     try {
       await axios.delete(`${API_URL}/admin/billing/${billId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setBills(bills.filter((b) => b.billId !== billId));
+      setBills((prev) => prev.filter((b) => b.id !== billId));
     } catch (err) {
       alert(err.response?.data?.detail || "Delete failed!");
     }
@@ -64,7 +55,6 @@ const BillsAdmin = () => {
       <div className="flex-1 flex flex-col">
         <AdminNavbar />
 
-        {/* MAIN SECTION */}
         <div className="p-6 text-lg">
           <h1 className="text-2xl font-bold mb-4">All Bills</h1>
 
@@ -77,15 +67,24 @@ const BillsAdmin = () => {
           {bills.length === 0 ? (
             <p>No bills in the system yet.</p>
           ) : (
-            bills.map((bill, index) => (
+            bills.map((bill) => (
               <div
-                key={index}
+                key={bill.id}
                 className="bg-white/5 border border-white/20 p-4 rounded mt-3"
               >
-                <p><b>Bill #:</b> {bill.bill_number}</p>
-                <p><b>User Email:</b> {bill.user_email || bill.user_id}</p>
-                <p><b>Date:</b> {bill.created_at?.split("T")[0]}</p>
-                <p><b>Total:</b> ₹{bill.total_amount}</p>
+                <p>
+                  <b>Bill #:</b> {bill.bill_number}
+                </p>
+                <p>
+                  <b>User Email:</b> {bill.user_email || bill.user_id}
+                </p>
+                <p>
+                  <b>Date:</b>{" "}
+                  {bill.created_at ? bill.created_at.split("T")[0] : "-"}
+                </p>
+                <p>
+                  <b>Total:</b> ₹{bill.total_amount}
+                </p>
 
                 <button
                   onClick={() => deleteBill(bill.id)}

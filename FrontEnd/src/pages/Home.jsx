@@ -12,7 +12,7 @@ const Home = () => {
   const role = localStorage.getItem("role");
 
   // SEARCH + FILTERS
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("");      // 👉 now Bill ID
   const [product, setProduct] = useState("");
   const [rating, setRating] = useState("");
 
@@ -50,19 +50,56 @@ const Home = () => {
     }
   };
 
-  const handleSearch = () => {
-    if (!token) return setSearchError("Please login first!");
+  // 🔍 SEARCH BILL BY ID (logged-in user only)
+  const handleBillSearch = async () => {
+    setSearchError("");
 
-    if (!query && !product && !rating) {
-      return setSearchError("Enter something to search or apply filters.");
+    if (!token) {
+      return setSearchError("Please login first!");
     }
 
+    if (!query.trim()) {
+      return setSearchError("Enter a Bill ID to search.");
+    }
+
+    const billId = query.trim();
+
+    try {
+      const res = await axios.get(`${API_URL}/billing/${billId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Navigate to View Bills and pass the found bill (you can use this in ViewBills.jsx)
+      navigate("/view-bills", { state: { billFromSearch: res.data } });
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setSearchError("No bill found with this ID for your account.");
+      } else {
+        setSearchError(err.response?.data?.detail || "Search failed");
+      }
+    }
+  };
+
+  // 🎛 Existing filter → still used for Add Bill (do not break it)
+  const handleFilterApply = () => {
+    setFilterError("");
+    setSearchError("");
+
+    if (!token) {
+      return setSearchError("Please login first!");
+    }
+
+    // Must select product + rating together
     if ((product && !rating) || (!product && rating)) {
       return setFilterError("Please select both product type and rating.");
     }
 
+    if (!product && !rating) {
+      return setFilterError("Select a product and rating to proceed.");
+    }
+
     navigate("/add-bill", {
-      state: { query, product, rating },
+      state: { product, rating },
     });
   };
 
@@ -89,7 +126,6 @@ const Home = () => {
         {/* LEFT BOX */}
         <div className="flex justify-center">
           <div className="flex flex-col bg-white/2 backdrop-blur-xl gap-4 items-center border border-green-900/60 rounded-xl px-6 py-6 w-full max-w-md">
-            {/* LOGGED IN → Show Search UI */}
             {token ? (
               <>
                 <h1 className="text-lg font-bold text-white">
@@ -102,17 +138,18 @@ const Home = () => {
                   </p>
                 )}
 
+                {/* 🔍 BILL SEARCH BY ID */}
                 <div className="flex items-center w-full bg-white/10 border px-2 border-white/20 rounded-lg backdrop-blur-md focus-within:border-green-500 focus-within:ring-1 focus-within:ring-green-500 focus-within:bg-white">
                   <input
                     type="text"
-                    placeholder="Search Devices..."
+                    placeholder="Search Bill by ID..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    onKeyDown={(e) => e.key === "Enter" && handleBillSearch()}
                     className="bg-transparent outline-none placeholder-gray-400 w-full py-2 focus:bg-white focus:text-black"
                   />
                   <button
-                    onClick={handleSearch}
+                    onClick={handleBillSearch}
                     className="text-green-600 font-semibold hover:text-green-400 cursor-pointer"
                   >
                     Search
@@ -120,9 +157,10 @@ const Home = () => {
                 </div>
 
                 <p className="text-center text-gray-300 text-sm mt-4">
-                  Use search or apply filters to find products
+                  Use Bill ID to quickly find your bills or apply product filters below.
                 </p>
 
+                {/* FILTERS (unchanged layout, options updated) */}
                 <div className="flex flex-col gap-4 w-full">
                   {filterError && (
                     <p className="text-red-500 text-sm bg-red-500/10 border border-red-500/40 rounded px-2 py-1 w-full text-center">
@@ -130,7 +168,7 @@ const Home = () => {
                     </p>
                   )}
 
-                  {/* DROPDOWNS */}
+                  {/* PRODUCT TYPE */}
                   <div className="flex flex-col w-full">
                     <label className="text-white text-sm">Product Type</label>
                     <select
@@ -139,16 +177,13 @@ const Home = () => {
                       className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-600 focus:bg-white focus:text-black focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none"
                     >
                       <option value="">Select Product</option>
-                      <option>Drives</option>
-                      <option>Encoders</option>
-                      <option>Motors</option>
-                      <option>Battery</option>
-                      <option>Solar</option>
-                      <option>Feeders</option>
-                      <option>Welder</option>
+                      <option value="DOL">DOL Starter</option>
+                      <option value="RDOL">RDOL Starter</option>
+                      <option value="S/D">S/D Starter</option>
                     </select>
                   </div>
 
+                  {/* RATING */}
                   <div className="flex flex-col w-full">
                     <label className="text-sm">Rating (kW)</label>
                     <select
@@ -157,32 +192,36 @@ const Home = () => {
                       className="bg-white/9 border border-white/20 rounded-lg px-3 py-2 text-gray-600 focus:text-black focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:bg-white"
                     >
                       <option value="">Select Rating</option>
-                      <option>0.5kW</option>
-                      <option>1kW</option>
-                      <option>2kW</option>
-                      <option>2.5kW</option>
-                      <option>3kW</option>
+                      <option value="0.06">0.06 kW</option>
+                      <option value="0.09">0.09 kW</option>
+                      <option value="0.12">0.12 kW</option>
+                      <option value="0.18">0.18 kW</option>
+                      <option value="0.25">0.25 kW</option>
+                      <option value="0.37">0.37 kW</option>
                     </select>
                   </div>
 
                   <div className="flex justify-center items-center">
                     <button
-                      onClick={handleSearch}
+                      onClick={handleFilterApply}
                       className="bg-red-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-700 w-32 cursor-pointer mt-2"
                     >
-                      Apply
+                      <p className="active:scale-95 transition-all duration-150">
+                        Apply
+                      </p>
                     </button>
                   </div>
                 </div>
               </>
             ) : (
-              // ❌ NOT LOGGED IN → Placeholder area
-              <div className="flex items-center justify-center m-5 p-5"><InteractiveGrid /></div>
+              <div className="flex items-center justify-center m-5 p-5">
+                <InteractiveGrid />
+              </div>
             )}
           </div>
         </div>
 
-        {/* RIGHT BOX */}
+        {/* RIGHT BOX (login) – unchanged */}
         <div className="flex justify-center">
           <div className="flex flex-col bg-white/2 gap-4 items-center border border-green-900/60 rounded-xl px-6 py-6 w-full max-w-md">
             {!token ? (
@@ -241,14 +280,13 @@ const Home = () => {
                   onClick={handleLogin}
                   className="bg-red-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-700 mt-2 w-32 cursor-pointer"
                 >
-                  Login
+                  <p className="active:scale-95 transition-all duration-150">
+                    Login
+                  </p>
                 </button>
               </>
             ) : (
-              // Logged in → Placeholder UI
-              <div className="text-gray-400 text-sm">
-                ✨ Animation Coming...
-              </div>
+              <div className="text-gray-400 text-sm">✨ Animation Coming...</div>
             )}
           </div>
         </div>

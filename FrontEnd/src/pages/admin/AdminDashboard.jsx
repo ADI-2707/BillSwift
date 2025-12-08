@@ -14,47 +14,43 @@ const AdminDashboard = () => {
   const [pending, setPending] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalBills, setTotalBills] = useState(0);
+  const [productsCount, setProductsCount] = useState(0);
   const [error, setError] = useState("");
 
-  // Fetch Admin Stats
   const fetchStats = async () => {
     try {
-      const pendingRes = await axios.get(`${API_URL}/admin/users/pending`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setPending(pendingRes.data.length);
+      const headers = { Authorization: `Bearer ${token}` };
 
-      const usersRes = await axios.get(`${API_URL}/admin/users/all`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setTotalUsers(usersRes.data.length);
+      const [pendingRes, usersRes, billsRes, productsRes] = await Promise.all([
+        axios.get(`${API_URL}/admin/users/pending`, { headers }),
+        axios.get(`${API_URL}/admin/users/all`, { headers }),
+        axios.get(`${API_URL}/admin/billing/all-bills`, { headers }),
+        axios.get(`${API_URL}/products`, { headers }),
+      ]);
 
-      const billsRes = await axios.get(`${API_URL}/billing/admin/all`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setTotalBills(billsRes.data.length);
+      setPending(pendingRes.data.length || 0);
+      setTotalUsers(usersRes.data.length || 0);
+      setTotalBills(billsRes.data.length || 0);
+      setProductsCount(productsRes.data.length || 0);
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to load dashboard stats");
     }
   };
 
   useEffect(() => {
-    // Auth protection
     if (!token) {
       navigate("/login");
       return;
     }
-
     if (role !== "admin") {
       navigate("/unauthorized");
       return;
     }
-
     fetchStats();
   }, []);
 
   return (
-    <div className="flex h-screen bg-black text-white">
+    <div className="flex h-screen bg-black text-white border-2 border-white/10 rounded">
       <Sidebar />
 
       <div className="flex-1 flex flex-col">
@@ -67,7 +63,7 @@ const AdminDashboard = () => {
         <div className="p-6 grid grid-cols-4 gap-6">
           <DashboardCard title="Pending Approvals" value={pending} />
           <DashboardCard title="Total Users" value={totalUsers} />
-          <DashboardCard title="Products Listed" value="57" />
+          <DashboardCard title="Products Listed" value={productsCount} />
           <DashboardCard title="Bills Created" value={totalBills} />
         </div>
       </div>

@@ -1,95 +1,170 @@
+# app/routers/product.py
+from decimal import Decimal
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from app.db.session import get_db
 from app.models.product import Product
-from app.schemas.product import ProductCreate, ProductOut, ProductUpdate
-from app.auth.jwt_handler import get_current_user, require_admin
+from app.models.product_component import ProductComponent
+from app.schemas.product import (
+    ProductCreate,
+    ProductUpdate,
+    ProductOut,
+    ProductComponentUpdate,
+)
+from app.auth.jwt_handler import require_admin
+from app.models.user import User
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
-# ADD PRODUCT (ADMIN ONLY)
+def _recalculate_prices(product: Product) -> None:
+    """Recalculate base_price and total_price from components and GST."""
+    base = Decimal("0.00")
+
+    for comp in product.components:
+        comp.line_total = Decimal(str(comp.unit_price)) * comp.quantity
+        base += comp.line_total
+
+    product.base_price = base
+    gst_fraction = Decimal(str(product.gst_percent or 0)) / Decimal("100")
+    product.total_price = base + (base * gst_fraction)
+
+    # Keep legacy price in sync so old code doesn't explode
+    product.price = product.total_price
+
+
 @router.post("/", response_model=ProductOut)
-def create_product(
+def create_product_bundle(
     payload: ProductCreate,
     db: Session = Depends(get_db),
-    _: dict = Depends(require_admin),
+    _: User = Depends(require_admin),
 ):
-    product = Product(**payload.model_dump())
+    if not payload.components:
+        raise HTTPException(status_code=400, detail="Bundle must contain at least one component")
+
+    product = Product(
+        starter_type=payload.starter_type,
+        rating_kw=Decimal(str(payload.rating_kw)),
+        gst_percent=Decimal(str(payload.gst_percent)),
+        device_name=payload.starter_type,  # legacy alias
+    )
+
+    for c in payload.components:
+        comp = ProductComponent(
+            name=c.name,
+            brand_name=c.brand_name,
+            model=c.model,
+            quantity=c.quantity,
+            unit_price=Decimal(str(c.unit_price)),
+            line_total=Decimal(str(c.unit_price)) * c.quantity,
+        )
+        product.components.append(comp)
+
+    _recalculate_prices(product)
     db.add(product)
     db.commit()
     db.refresh(product)
     return product
 
-# LIST / FILTER PRODUCTS
+
 @router.get("/", response_model=list[ProductOut])
-def list_products(
-    device_name: str | None = None,
-    brand_name: str | None = None,
-    model: str | None = None,
-    rating_min: float | None = None,
-    rating_max: float | None = None,
-    price_min: float | None = None,
-    price_max: float | None = None,
-    db: Session = Depends(get_db)
+def list_product_bundles(
+    starter_type: str | None = None,
+    rating_kw: float | None = None,
+    db: Session = Depends(get_db),
 ):
-    query = db.query(Product)
+    q = db.query(Product).filter(Product.is_active == True)
 
-    if device_name:
-        query = query.filter(Product.device_name.ilike(f"%{device_name}%"))
+    if starter_type:
+        q = q.filter(Product.starter_type == starter_type)
 
-    if brand_name:
-        query = query.filter(Product.brand_name.ilike(f"%{brand_name}%"))
+    if rating_kw is not None:
+        q = q.filter(Product.rating_kw == Decimal(str(rating_kw)))
 
-    if model:
-        query = query.filter(Product.model.ilike(f"%{model}%"))
+    products = q.order_by(Product.starter_type, Product.rating_kw).all()
+    return products
 
-    if rating_min is not None:
-        query = query.filter(Product.rating_kw >= rating_min)
 
-    if rating_max is not None:
-        query = query.filter(Product.rating_kw <= rating_max)
+@router.delete("/{product_id}")
+def delete_product_bundle(
+    product_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Bundle not found")
 
-    if price_min is not None:
-        query = query.filter(Product.price >= price_min)
+    db.delete(product)
+    db.commit()
+    return {"message": "Bundle deleted successfully"}
 
-    if price_max is not None:
-        query = query.filter(Product.price <= price_max)
 
-    return query.all()
-
-# UPDATE (ADMIN ONLY)
 @router.put("/{product_id}", response_model=ProductOut)
-def update_product(
+def update_product_bundle(
     product_id: int,
     payload: ProductUpdate,
     db: Session = Depends(get_db),
-    _: dict = Depends(require_admin),
+    _: User = Depends(require_admin),
 ):
     product = db.query(Product).filter(Product.id == product_id).first()
-
     if not product:
-        raise HTTPException(404, "Product not found")
+        raise HTTPException(status_code=404, detail="Bundle not found")
 
-    update_data = payload.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(product, key, value)
+    if payload.starter_type is not None:
+        product.starter_type = payload.starter_type
+        product.device_name = payload.starter_type  # legacy mapping
 
+    if payload.rating_kw is not None:
+        product.rating_kw = Decimal(str(payload.rating_kw))
+
+    if payload.gst_percent is not None:
+        product.gst_percent = Decimal(str(payload.gst_percent))
+
+    _recalculate_prices(product)
     db.commit()
     db.refresh(product)
     return product
 
-# DELETE PRODUCT
-@router.delete("/{product_id}")
-def delete_product(
-    product_id: int,
+
+@router.put("/components/{component_id}", response_model=ProductOut)
+def update_component(
+    component_id: int,
+    payload: ProductComponentUpdate,
     db: Session = Depends(get_db),
-    _: dict = Depends(require_admin),
+    _: User = Depends(require_admin),
 ):
-    product = db.query(Product).filter(Product.id == product_id).first()
+    comp = db.query(ProductComponent).filter(ProductComponent.id == component_id).first()
+    if not comp:
+        raise HTTPException(status_code=404, detail="Component not found")
 
-    if not product:
-        raise HTTPException(404, "Product not found")
+    if payload.quantity is not None:
+        comp.quantity = payload.quantity
 
-    db.delete(product)
+    if payload.unit_price is not None:
+        comp.unit_price = Decimal(str(payload.unit_price))
+
+    parent = comp.product
+    _recalculate_prices(parent)
     db.commit()
-    return {"message": "Product deleted successfully"}
+    db.refresh(parent)
+    return parent
+
+
+@router.delete("/components/{component_id}", response_model=ProductOut)
+def delete_component(
+    component_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    comp = db.query(ProductComponent).filter(ProductComponent.id == component_id).first()
+    if not comp:
+        raise HTTPException(status_code=404, detail="Component not found")
+
+    parent = comp.product
+    db.delete(comp)
+    _recalculate_prices(parent)
+    db.commit()
+    db.refresh(parent)
+    return parent
