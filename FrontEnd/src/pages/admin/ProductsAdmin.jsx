@@ -1,3 +1,4 @@
+// FrontEnd/src/pages/admin/ProductsAdmin.jsx
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/admin/Sidebar";
 import AdminNavbar from "../../components/admin/AdminNavbar";
@@ -10,12 +11,13 @@ const ProductsAdmin = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // NEW BUNDLE (starter) form – GST removed
   const [newBundle, setNewBundle] = useState({
     starter_type: "",
     rating_kw: "",
-    gst_percent: "",
   });
 
+  // Nested components in the bundle
   const [components, setComponents] = useState([
     { name: "", brand_name: "", model: "", quantity: "", unit_price: "" },
   ]);
@@ -27,6 +29,7 @@ const ProductsAdmin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // auth guards
     if (!token) {
       navigate("/login");
       return;
@@ -41,7 +44,7 @@ const ProductsAdmin = () => {
         const res = await axios.get(`${API_URL}/products`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setBundles(res.data);
+        setBundles(res.data || []);
       } catch (err) {
         setError("Failed to fetch products/bundles");
       } finally {
@@ -51,6 +54,8 @@ const ProductsAdmin = () => {
 
     fetchBundles();
   }, []);
+
+  // -------- FORM HANDLERS --------
 
   const handleBundleChange = (e) => {
     setNewBundle({ ...newBundle, [e.target.name]: e.target.value });
@@ -70,13 +75,14 @@ const ProductsAdmin = () => {
   };
 
   const removeComponentRow = (index) => {
-    if (components.length === 1) return;
+    if (components.length === 1) return; // keep at least one row
     setComponents(components.filter((_, i) => i !== index));
   };
 
   const addBundle = async () => {
-    if (!newBundle.starter_type || !newBundle.rating_kw || !newBundle.gst_percent) {
-      alert("Fill Starter type, Rating & GST%");
+    // basic validation – GST removed
+    if (!newBundle.starter_type || !newBundle.rating_kw) {
+      alert("Please fill Starter type and Rating (kW)");
       return;
     }
 
@@ -91,7 +97,7 @@ const ProductsAdmin = () => {
       }));
 
     if (cleanedComponents.length === 0) {
-      alert("Add at least one valid component!");
+      alert("Please add at least one valid component!");
       return;
     }
 
@@ -99,7 +105,6 @@ const ProductsAdmin = () => {
       const payload = {
         starter_type: newBundle.starter_type,
         rating_kw: parseFloat(newBundle.rating_kw),
-        gst_percent: parseFloat(newBundle.gst_percent),
         components: cleanedComponents,
       };
 
@@ -107,9 +112,10 @@ const ProductsAdmin = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setBundles([...bundles, res.data]);
+      setBundles((prev) => [...prev, res.data]);
 
-      setNewBundle({ starter_type: "", rating_kw: "", gst_percent: "" });
+      // reset form
+      setNewBundle({ starter_type: "", rating_kw: "" });
       setComponents([
         { name: "", brand_name: "", model: "", quantity: "", unit_price: "" },
       ]);
@@ -126,7 +132,7 @@ const ProductsAdmin = () => {
       await axios.delete(`${API_URL}/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setBundles(bundles.filter((b) => b.id !== id));
+      setBundles((prev) => prev.filter((b) => b.id !== id));
     } catch (err) {
       alert(err.response?.data?.detail || "Delete failed!");
     }
@@ -137,14 +143,14 @@ const ProductsAdmin = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-black text-white overflow-y-auto">
+    <div className="flex min-h-screen bg-black/50 border-2 border-white/20 rounded-lg text-white overflow-y-auto mt-10">
       <Sidebar />
 
       <div className="flex-1 flex flex-col">
         <AdminNavbar />
 
         <div className="p-6 text-lg">
-          <h2 className="text-2xl font-bold mb-4">Product Management</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center">Product Management</h2>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
           {loading && <p>Loading...</p>}
@@ -153,6 +159,7 @@ const ProductsAdmin = () => {
           <div className="mb-6 bg-white/10 p-4 rounded">
             <h3 className="font-bold mb-3">Add New Starter Bundle</h3>
 
+            {/* Starter / Rating fields (GST removed) */}
             <div className="grid grid-cols-2 gap-3 mb-4">
               <select
                 name="starter_type"
@@ -173,37 +180,40 @@ const ProductsAdmin = () => {
                 onChange={handleBundleChange}
                 className="bg-white/20 px-3 py-2 rounded outline-none"
               />
-
-              <input
-                name="gst_percent"
-                placeholder="GST %"
-                value={newBundle.gst_percent}
-                onChange={handleBundleChange}
-                className="bg-white/20 px-3 py-2 rounded outline-none"
-              />
             </div>
 
             {/* Components input */}
-            <h4 className="font-semibold mb-2 text-sm">Components in this bundle</h4>
+            <h4 className="font-semibold mb-2 text-sm">
+              Components in this bundle
+            </h4>
             <div className="grid grid-cols-2 gap-3">
               {components.map((c, index) => (
-                <div key={index} className="bg-white/10 p-2 rounded flex flex-col gap-1">
+                <div
+                  key={index}
+                  className="bg-white/10 p-2 rounded flex flex-col gap-1"
+                >
                   <input
                     placeholder="Component Name"
                     value={c.name}
-                    onChange={(e) => handleComponentChange(index, "name", e.target.value)}
+                    onChange={(e) =>
+                      handleComponentChange(index, "name", e.target.value)
+                    }
                     className="bg-white/20 px-2 py-1 rounded outline-none text-sm"
                   />
                   <input
                     placeholder="Brand"
                     value={c.brand_name}
-                    onChange={(e) => handleComponentChange(index, "brand_name", e.target.value)}
+                    onChange={(e) =>
+                      handleComponentChange(index, "brand_name", e.target.value)
+                    }
                     className="bg-white/20 px-2 py-1 rounded outline-none text-sm"
                   />
                   <input
                     placeholder="Model (optional)"
                     value={c.model}
-                    onChange={(e) => handleComponentChange(index, "model", e.target.value)}
+                    onChange={(e) =>
+                      handleComponentChange(index, "model", e.target.value)
+                    }
                     className="bg-white/20 px-2 py-1 rounded outline-none text-sm"
                   />
 
@@ -211,13 +221,17 @@ const ProductsAdmin = () => {
                     <input
                       placeholder="Qty"
                       value={c.quantity}
-                      onChange={(e) => handleComponentChange(index, "quantity", e.target.value)}
+                      onChange={(e) =>
+                        handleComponentChange(index, "quantity", e.target.value)
+                      }
                       className="bg-white/20 px-2 py-1 rounded outline-none text-sm w-1/3"
                     />
                     <input
                       placeholder="Unit Price"
                       value={c.unit_price}
-                      onChange={(e) => handleComponentChange(index, "unit_price", e.target.value)}
+                      onChange={(e) =>
+                        handleComponentChange(index, "unit_price", e.target.value)
+                      }
                       className="bg-white/20 px-2 py-1 rounded outline-none text-sm w-2/3"
                     />
                   </div>
@@ -255,7 +269,6 @@ const ProductsAdmin = () => {
               <tr>
                 <th className="p-2 text-left">Starter Type</th>
                 <th className="p-2 text-left">Rating</th>
-                <th className="p-2 text-left">GST</th>
                 <th className="p-2 text-left">Total Price</th>
                 <th className="p-2 text-left">Actions</th>
               </tr>
@@ -270,7 +283,6 @@ const ProductsAdmin = () => {
                   >
                     <td className="p-2">{b.starter_type}</td>
                     <td className="p-2">{b.rating_kw} kW</td>
-                    <td className="p-2">{b.gst_percent} %</td>
                     <td className="p-2">₹{b.total_price}</td>
                     <td className="p-2">
                       <button
@@ -287,25 +299,33 @@ const ProductsAdmin = () => {
 
                   {expandedId === b.id && (
                     <tr className="border-b border-gray-700">
-                      <td colSpan={5} className="p-3 bg-black/60">
-                        <p className="font-semibold mb-2 text-sm">Components</p>
+                      <td colSpan={4} className="p-3 bg-black/60">
+                        <p className="font-semibold mb-2 text-sm">
+                          Components
+                        </p>
 
                         {b.components?.length > 0 ? (
                           <div className="space-y-2">
                             {b.components.map((c) => (
-                              <div key={c.id} className="flex justify-between items-center bg-white/5 px-3 py-2 rounded">
+                              <div
+                                key={c.id}
+                                className="flex justify-between items-center bg-white/5 px-3 py-2 rounded"
+                              >
                                 <div className="text-xs">
                                   <strong>{c.name}</strong> — {c.brand_name}
                                   {c.model && ` (${c.model})`}
                                   <div className="text-gray-300">
-                                    Qty: {c.quantity} | Unit: ₹{c.unit_price} | Line: ₹{c.line_total}
+                                    Qty: {c.quantity} | Unit: ₹{c.unit_price} |
+                                    Line: ₹{c.line_total}
                                   </div>
                                 </div>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <p className="text-gray-400 text-xs">No components found.</p>
+                          <p className="text-gray-400 text-xs">
+                            No components found.
+                          </p>
                         )}
                       </td>
                     </tr>

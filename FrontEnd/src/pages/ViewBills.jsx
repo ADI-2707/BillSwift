@@ -1,3 +1,4 @@
+// src/pages/ViewBills.jsx
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { API_URL } from "../api/base";
@@ -11,7 +12,6 @@ const ViewBills = () => {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  // Fetch Bills from Backend
   const fetchBills = async () => {
     try {
       const res = await axios.get(`${API_URL}/billing/my-bills`, {
@@ -24,33 +24,27 @@ const ViewBills = () => {
   };
 
   useEffect(() => {
-    // If not logged in → Go login
     if (!token) {
       navigate("/login");
       return;
     }
 
-    // If user is not approved → Block access
     if (role !== "admin" && role !== "user") {
       navigate("/unauthorized");
       return;
     }
 
     fetchBills();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Delete Bill
-  const deleteBill = async (billId) => {
-    try {
-      await axios.delete(`${API_URL}/billing/${billId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  const deleteBillFromUI = (billId) => {
+    // Per requirement: only remove from UI; keep in DB
+    setData((prev) => prev.filter((b) => b.id !== billId));
+  };
 
-      // Refresh UI after deletion
-      setData((prev) => prev.filter((b) => b.billId !== billId));
-    } catch (err) {
-      setError(err.response?.data?.detail || "Delete failed");
-    }
+  const openBill = (billId) => {
+    navigate("/add-bill", { state: { billId } });
   };
 
   return (
@@ -63,28 +57,40 @@ const ViewBills = () => {
         </p>
       )}
 
-      {data.length === 0 && (
+      {data.length === 0 && !error && (
         <p className="mt-4 text-gray-400">No bills found.</p>
       )}
 
       {data.map((bill) => (
-        <div key={bill.billId} className="bg-gray-900 p-4 mt-4 rounded">
+        <div key={bill.id} className="bg-gray-900 p-4 mt-4 rounded">
           <p>
-            <b>ID:</b> {bill.billId}
+            <b>ID:</b> {bill.bill_number}
           </p>
           <p>
-            <b>Date:</b> {bill.createdAt}
+            <b>Date:</b>{" "}
+            {bill.created_at
+              ? new Date(bill.created_at).toLocaleDateString("en-IN")
+              : "-"}
           </p>
           <p>
-            <b>Total:</b> ${bill.total}
+            <b>Total:</b> ₹{bill.total_amount}
           </p>
 
-          <button
-            onClick={() => deleteBill(bill.billId)}
-            className="mt-3 bg-red-600 px-3 py-1 rounded"
-          >
-            Delete
-          </button>
+          <div className="mt-3 flex gap-3">
+            <button
+              onClick={() => openBill(bill.id)}
+              className="bg-green-600 px-3 py-1 rounded"
+            >
+              Open
+            </button>
+
+            <button
+              onClick={() => deleteBillFromUI(bill.id)}
+              className="bg-red-600 px-3 py-1 rounded"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       ))}
     </div>

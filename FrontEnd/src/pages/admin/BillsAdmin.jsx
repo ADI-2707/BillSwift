@@ -1,3 +1,4 @@
+// FrontEnd/src/pages/admin/BillsAdmin.jsx
 import { useEffect, useState } from "react";
 import Sidebar from "../../components/admin/Sidebar";
 import AdminNavbar from "../../components/admin/AdminNavbar";
@@ -38,6 +39,8 @@ const BillsAdmin = () => {
   }, []);
 
   const deleteBill = async (billId) => {
+    if (!window.confirm("Delete this bill?")) return;
+
     try {
       await axios.delete(`${API_URL}/admin/billing/${billId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -50,13 +53,13 @@ const BillsAdmin = () => {
   };
 
   return (
-    <div className="flex h-screen bg-black text-white">
+    <div className="flex h-screen bg-black/50 border-2 border-white/20 rounded-lg text-white mt-10">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <AdminNavbar />
 
         <div className="p-6 text-lg">
-          <h1 className="text-2xl font-bold mb-4">All Bills</h1>
+          <h1 className="text-2xl font-bold mb-4 text-center">All Bills</h1>
 
           {error && (
             <p className="text-red-500 text-sm bg-red-500/10 border border-red-500/40 rounded px-3 py-1 mb-4">
@@ -70,7 +73,7 @@ const BillsAdmin = () => {
             bills.map((bill) => (
               <div
                 key={bill.id}
-                className="bg-white/5 border border-white/20 p-4 rounded mt-3"
+                className="bg-white/5 border border-white/20 p-4 rounded-lg mt-3"
               >
                 <p>
                   <b>Bill #:</b> {bill.bill_number}

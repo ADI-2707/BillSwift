@@ -18,8 +18,12 @@ from app.models.user import User
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
+
 def _recalculate_prices(product: Product) -> None:
-    """Recalculate base_price and total_price from components and GST."""
+    """
+    Recalculate base_price and total_price from components.
+    GST has been removed, so total_price = base_price.
+    """
     base = Decimal("0.00")
 
     for comp in product.components:
@@ -27,9 +31,7 @@ def _recalculate_prices(product: Product) -> None:
         base += comp.line_total
 
     product.base_price = base
-    gst_fraction = Decimal(str(product.gst_percent or 0)) / Decimal("100")
-    product.total_price = base + (base * gst_fraction)
-
+    product.total_price = base  # no GST now
     # Keep legacy price in sync so old code doesn't explode
     product.price = product.total_price
 
@@ -40,13 +42,18 @@ def create_product_bundle(
     db: Session = Depends(get_db),
     _: User = Depends(require_admin),
 ):
+    """
+    Create a new starter bundle (DOL / RDOL / S/D) with many components.
+    """
     if not payload.components:
-        raise HTTPException(status_code=400, detail="Bundle must contain at least one component")
+        raise HTTPException(
+            status_code=400,
+            detail="Bundle must contain at least one component",
+        )
 
     product = Product(
         starter_type=payload.starter_type,
         rating_kw=Decimal(str(payload.rating_kw)),
-        gst_percent=Decimal(str(payload.gst_percent)),
         device_name=payload.starter_type,  # legacy alias
     )
 
@@ -74,6 +81,9 @@ def list_product_bundles(
     rating_kw: float | None = None,
     db: Session = Depends(get_db),
 ):
+    """
+    List active starter bundles. Can be filtered by starter_type and rating_kw.
+    """
     q = db.query(Product).filter(Product.is_active == True)
 
     if starter_type:
@@ -92,6 +102,9 @@ def delete_product_bundle(
     db: Session = Depends(get_db),
     _: User = Depends(require_admin),
 ):
+    """
+    Delete a starter bundle (and its components).
+    """
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Bundle not found")
@@ -108,6 +121,10 @@ def update_product_bundle(
     db: Session = Depends(get_db),
     _: User = Depends(require_admin),
 ):
+    """
+    Update basic bundle info (starter_type / rating_kw).
+    Components are managed via the component endpoints.
+    """
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Bundle not found")
@@ -118,9 +135,6 @@ def update_product_bundle(
 
     if payload.rating_kw is not None:
         product.rating_kw = Decimal(str(payload.rating_kw))
-
-    if payload.gst_percent is not None:
-        product.gst_percent = Decimal(str(payload.gst_percent))
 
     _recalculate_prices(product)
     db.commit()
@@ -135,7 +149,14 @@ def update_component(
     db: Session = Depends(get_db),
     _: User = Depends(require_admin),
 ):
-    comp = db.query(ProductComponent).filter(ProductComponent.id == component_id).first()
+    """
+    Update quantity / unit_price for a component inside a bundle.
+    """
+    comp = (
+        db.query(ProductComponent)
+        .filter(ProductComponent.id == component_id)
+        .first()
+    )
     if not comp:
         raise HTTPException(status_code=404, detail="Component not found")
 
@@ -158,7 +179,14 @@ def delete_component(
     db: Session = Depends(get_db),
     _: User = Depends(require_admin),
 ):
-    comp = db.query(ProductComponent).filter(ProductComponent.id == component_id).first()
+    """
+    Remove a component from a bundle and recalc prices.
+    """
+    comp = (
+        db.query(ProductComponent)
+        .filter(ProductComponent.id == component_id)
+        .first()
+    )
     if not comp:
         raise HTTPException(status_code=404, detail="Component not found")
 

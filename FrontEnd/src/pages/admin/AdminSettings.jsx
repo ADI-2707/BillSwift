@@ -53,13 +53,13 @@ const AdminSettings = () => {
   };
 
   return (
-    <div className="flex h-screen bg-black text-white">
+    <div className="flex min-h-screen bg-black/50 border-2 border-white/20 rounded-lg text-white mt-10 overflow-y-auto">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <AdminNavbar />
 
         <div className="p-6 text-lg">
-          <h2 className="text-2xl mb-6 font-semibold">Admin Settings</h2>
+          <h2 className="text-2xl mb-6 font-semibold text-center">Admin Settings</h2>
 
           {error && (
             <p className="text-red-500 text-sm bg-red-500/10 border border-red-500/40 rounded px-3 py-1 mb-4">

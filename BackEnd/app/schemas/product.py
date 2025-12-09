@@ -27,19 +27,16 @@ class ProductComponentOut(BaseModel):
 class ProductCreate(BaseModel):
     starter_type: Literal["DOL", "RDOL", "S/D"]
     rating_kw: float
-    gst_percent: float
     components: List[ProductComponentCreate]
 
 class ProductUpdate(BaseModel):
     starter_type: Optional[Literal["DOL", "RDOL", "S/D"]] = None
     rating_kw: Optional[float] = None
-    gst_percent: Optional[float] = None
 
 class ProductOut(BaseModel):
     id: int
     starter_type: str
     rating_kw: float
-    gst_percent: float
     base_price: float
     total_price: float
     components: List[ProductComponentOut] = []

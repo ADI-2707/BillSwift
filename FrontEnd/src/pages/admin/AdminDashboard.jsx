@@ -50,12 +50,12 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="flex h-screen bg-black text-white border-2 border-white/10 rounded">
+    <div className="flex min-h-screen bg-black/50 text-white border-2 border-white/20 rounded-lg overflow-y-auto mt-10">
       <Sidebar />
 
       <div className="flex-1 flex flex-col">
         <AdminNavbar />
-
+        <h1 className="text-2xl font-bold p-6 text-center">Admin Dashboard</h1>
         {error && (
           <p className="text-red-500 text-sm text-center mt-4">{error}</p>
         )}

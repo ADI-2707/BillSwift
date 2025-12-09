@@ -3,23 +3,31 @@ from sqlalchemy import Column, Integer, String, Numeric, Boolean, DateTime, func
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
+
 class Product(Base):
+    """
+    This represents a *starter bundle* (DOL / RDOL / S/D) for a given rating.
+    Each product has many ProductComponent rows that define its parts.
+    """
+
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
 
     # DOL / RDOL / S/D
     starter_type = Column(String(50), nullable=False, index=True)
+
     # Rating value in kW
     rating_kw = Column(Numeric(10, 2), nullable=False, index=True)
-    # GST percentage (e.g. 18.0)
-    gst_percent = Column(Numeric(5, 2), nullable=False, default=0)
+
     # Sum of all component (qty * unit_price)
     base_price = Column(Numeric(12, 2), nullable=False, default=0)
-    # Final price after GST
+
+    # Final bundle price (for now = base_price, since GST is removed)
     total_price = Column(Numeric(12, 2), nullable=False, default=0)
 
-    # We’ll mirror starter_type + total_price into these
+    # Legacy / compatibility fields used by older parts of the app
+    # (device_name will usually mirror starter_type, price mirrors total_price)
     device_name = Column(String(150), nullable=True, index=True)
     brand_name = Column(String(150), nullable=True, index=True)
     model = Column(String(150), nullable=True, index=True)
@@ -34,7 +42,7 @@ class Product(Base):
         onupdate=func.now()
     )
 
-    # Relationship: bundle can appear in many bill items
+    # Relationship: bundle can appear in many bill items (BillBundle/BillItem)
     bill_items = relationship("BillItem", back_populates="product", lazy="selectin")
 
     # Relationship: bundle has many components

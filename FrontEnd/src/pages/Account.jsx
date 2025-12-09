@@ -84,10 +84,10 @@ const Account = () => {
         </thead>
         <tbody>
           {bills.map((b) => (
-            <tr key={b.bill_id}>
-              <td className="px-4 py-2">{b.bill_id}</td>
+            <tr key={b.id}>
+              <td className="px-4 py-2">{b.bill_number}</td>
               <td className="px-4 py-2">{b.created_at?.split("T")[0]}</td>
-              <td className="px-4 py-2 text-green-400">₹{b.total}</td>
+              <td className="px-4 py-2 text-green-400">₹{b.total_amount}</td>
             </tr>
           ))}
         </tbody>

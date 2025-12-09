@@ -39,7 +39,7 @@ const Navbar = () => {
         </Link>
 
         {/* DESKTOP NAV LINKS */}
-        <div className="hidden md:flex gap-15 text-xl">
+        <div className="hidden md:flex gap-15 text-xl items-center">
           <NavLink to="/" className="nav_link">
             <span className="text-green-600">H</span>ome
           </NavLink>
