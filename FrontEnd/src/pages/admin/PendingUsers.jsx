@@ -63,16 +63,16 @@ const PendingUsers = () => {
     <div className="flex min-h-screen bg-black/50 text-white border-2 border-white/20 rounded-lg mt-10">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col p-5">
+      <div className="flex-1 flex flex-col">
         <AdminNavbar />
 
-        <h2 className="text-2xl font-bold mt-5 mb-4 text-center">Pending User Approvals</h2>
+        <h2 className="text-2xl font-bold mt-6 mb-6 text-center">Pending User Approvals</h2>
 
         {loading && <p>Loading users...</p>}
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
         {users.length === 0 && !loading ? (
-          <p className="text-gray-400 text-sm">No pending users</p>
+          <p className="text-gray-400 text-sm px-6">No pending users</p>
         ) : (
           <table className="border border-gray-700 text-sm w-full">
             <thead className="bg-gray-800">

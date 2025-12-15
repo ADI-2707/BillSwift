@@ -72,7 +72,7 @@ const AdminDashboard = () => {
 };
 
 const DashboardCard = ({ title, value }) => (
-  <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-xl text-center shadow-md">
+  <div className="bg-green-200/10 backdrop-blur-md border border-white/20 p-6 rounded-xl text-center shadow-md cursor-pointer hover:bg-green-400/20 hover:text-white transition-colors">
     <h4 className="text-sm text-gray-300">{title}</h4>
     <p className="text-3xl font-bold mt-2 text-green-400">{value}</p>
   </div>

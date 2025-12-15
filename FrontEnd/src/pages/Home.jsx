@@ -11,12 +11,10 @@ const Home = () => {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  // SEARCH + FILTERS
-  const [query, setQuery] = useState("");      // 👉 now Bill ID
+  const [query, setQuery] = useState("");
   const [product, setProduct] = useState("");
   const [rating, setRating] = useState("");
 
-  // LOGIN STATE
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",

@@ -19,7 +19,7 @@ const AdminNavbar = () => {
 
       <button
         onClick={handleLogout}
-        className="text-red-400 hover:text-red-500 transition flex items-center gap-2"
+        className="text-red-400 px-4 py-2 rounded-lg hover:bg-red-700/90 hover:text-white transition-all flex items-center gap-2 cursor-pointer active:scale-105"
       >
         <FiLogOut />
         Logout

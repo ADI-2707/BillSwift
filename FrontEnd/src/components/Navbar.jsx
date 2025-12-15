@@ -57,7 +57,7 @@ const Navbar = () => {
         <div className="hidden md:flex gap-8 text-xl px-10 items-center">
           {isLoggedIn() ? (
             <>
-              <button onClick={handleLogout} className="nav_link">
+              <button onClick={handleLogout} className="nav_link cursor-pointer">
                 Logout
               </button>
 
@@ -65,7 +65,7 @@ const Navbar = () => {
               {role === "admin" && (
                 <button
                   onClick={() => navigate("/admin")}
-                  className="nav_link text-yellow-400"
+                  className="nav_link text-yellow-400 cursor-pointer"
                 >
                   Admin
                 </button>
@@ -74,7 +74,7 @@ const Navbar = () => {
               {/* Account Circle */}
               <button
                 onClick={() => navigate("/account")}
-                className="flex items-center justify-center h-10 w-10 rounded-full bg-green-600 text-white font-bold cursor-pointer border border-white"
+                className="flex items-center justify-center h-10 w-10 rounded-full bg-green-600 text-white font-bold cursor-pointer border border-white hover:border-2 hover:bg-green-700 transition-all active:scale-95"
               >
                 {userEmail ? userEmail.charAt(0).toUpperCase() : "U"}
               </button>
