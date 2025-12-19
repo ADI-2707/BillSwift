@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../api/base";
+import * as XLSX from "xlsx";
 
 const AddBill = () => {
   const navigate = useNavigate();
@@ -25,9 +26,7 @@ const AddBill = () => {
   const recalcBundle = (bundle) => {
     const subtotal = bundle.components.reduce(
       (sum, c) =>
-        sum +
-        Math.max(1, Number(c.quantity || 1)) *
-          Number(c.unit_price || 0),
+        sum + Math.max(1, Number(c.quantity || 1)) * Number(c.unit_price || 0),
       0
     );
 
@@ -48,8 +47,7 @@ const AddBill = () => {
 
   useEffect(() => {
     if (!token) return navigate("/login");
-    if (role !== "admin" && role !== "user")
-      return navigate("/unauthorized");
+    if (role !== "admin" && role !== "user") return navigate("/unauthorized");
 
     axios
       .get(`${API_URL}/products`, { headers: authHeaders })
@@ -90,6 +88,92 @@ const AddBill = () => {
     ]);
   };
 
+  /* ---------------- GENERATE BILL ---------------- */
+  const generateExcel = (billNumber) => {
+    const rows = [];
+    let grandTotal = 0;
+
+    rows.push(["BILL ID:", billNumber]);
+    rows.push([]);
+
+    billBundles.forEach((bundle) => {
+      rows.push([`${bundle.starterType} ${bundle.ratingKw} kW`]);
+      rows.push(["PRODUCT", "MODEL", "BRAND", "QTY", "DISCOUNT", "RATE"]);
+
+      let bundleTotal = 0;
+
+      bundle.components.forEach((c) => {
+        const lineTotal = c.quantity * c.unit_price;
+        bundleTotal += lineTotal;
+
+        rows.push([
+          c.name,
+          c.model || "",
+          c.brand_name,
+          c.quantity,
+          0,
+          c.unit_price,
+        ]);
+      });
+
+      rows.push(["", "", "", "", "TOTAL", bundleTotal]);
+      rows.push([]);
+
+      grandTotal += bundleTotal;
+    });
+
+    rows.push([]);
+    rows.push(["DISCOUNT (%)", billDiscountPercent]);
+    rows.push([
+      "GRAND TOTAL",
+      grandTotal - (grandTotal * billDiscountPercent) / 100,
+    ]);
+
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Bill");
+
+    const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([wbout], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const url = URL.createObjectURL(blob);
+    window.open(url);
+  };
+
+  /* ---------------- CREATE BILL + EXCEL ---------------- */
+  const handleCreateBill = async () => {
+    try {
+      // 1️⃣ Save bill in DB
+      const items = billBundles.map((b) => ({
+        product_id: b.productId,
+        quantity: 1,
+        override_price: b.totalAfterDiscount,
+      }));
+
+      const res = await axios.post(
+        `${API_URL}/billing`,
+        {
+          items,
+          discount_amount: billDiscountAmount,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const billNumber = res.data.bill_number;
+
+      // 2️⃣ Generate Excel in new tab
+      generateExcel(billNumber);
+
+      // 3️⃣ Redirect to View Bills
+      navigate("/view-bills");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate order");
+    }
+  };
+
   /* ---------------- COMPONENT EDIT ---------------- */
 
   const updateQuantity = (bundleId, idx, value) => {
@@ -118,7 +202,7 @@ const AddBill = () => {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center p-8 text-white">
+      <div className="flex items-center text-center justify-center p-8 text-white">
         Loading...
       </div>
     );
@@ -228,6 +312,12 @@ const AddBill = () => {
             <p>Discount: ₹{billDiscountAmount.toFixed(2)}</p>
             <p className="font-bold">Total: ₹{grandTotal.toFixed(2)}</p>
           </div>
+          <button
+            onClick={handleCreateBill}
+            className="mt-4 bg-green-600 px-4 py-2 rounded"
+          >
+            Generate Order
+          </button>
         </>
       )}
     </div>

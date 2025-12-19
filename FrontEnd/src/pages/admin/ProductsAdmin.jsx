@@ -1,5 +1,4 @@
-// FrontEnd/src/pages/admin/ProductsAdmin.jsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/admin/Sidebar";
 import AdminNavbar from "../../components/admin/AdminNavbar";
 import axios from "axios";
@@ -7,333 +6,211 @@ import { API_URL } from "../../api/base";
 import { useNavigate } from "react-router-dom";
 
 const ProductsAdmin = () => {
-  const [bundles, setBundles] = useState([]);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
-  // NEW BUNDLE (starter) form – GST removed
-  const [newBundle, setNewBundle] = useState({
+  const [products, setProducts] = useState([]);
+  const [componentsMaster, setComponentsMaster] = useState([]);
+  const [expandedId, setExpandedId] = useState(null);
+
+  const [form, setForm] = useState({
     starter_type: "",
     rating_kw: "",
   });
 
-  // Nested components in the bundle
-  const [components, setComponents] = useState([
-    { name: "", brand_name: "", model: "", quantity: "", unit_price: "" },
+  const [bundleComponents, setBundleComponents] = useState([
+    { component_id: "", quantity: 1, unit_price_override: "" },
   ]);
 
-  const [expandedId, setExpandedId] = useState(null);
+  const authHeaders = { Authorization: `Bearer ${token}` };
 
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-  const navigate = useNavigate();
+  /* ---------------- AUTH + LOAD ---------------- */
 
   useEffect(() => {
-    // auth guards
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-    if (role !== "admin") {
-      navigate("/unauthorized");
-      return;
-    }
+    if (!token) return navigate("/login");
+    if (role !== "admin") return navigate("/unauthorized");
 
-    const fetchBundles = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/products`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setBundles(res.data || []);
-      } catch (err) {
-        setError("Failed to fetch products/bundles");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBundles();
+    Promise.all([
+      axios.get(`${API_URL}/products`, { headers: authHeaders }),
+      axios.get(`${API_URL}/components`, { headers: authHeaders }),
+    ]).then(([p, c]) => {
+      setProducts(p.data || []);
+      setComponentsMaster(c.data || []);
+    });
   }, []);
 
-  // -------- FORM HANDLERS --------
+  /* ---------------- FORM HANDLERS ---------------- */
 
-  const handleBundleChange = (e) => {
-    setNewBundle({ ...newBundle, [e.target.name]: e.target.value });
+  const updateComponentRow = (idx, field, value) => {
+    const copy = [...bundleComponents];
+    copy[idx][field] = value;
+    setBundleComponents(copy);
   };
 
-  const handleComponentChange = (index, field, value) => {
-    const copy = [...components];
-    copy[index][field] = value;
-    setComponents(copy);
-  };
-
-  const addComponentRow = () => {
-    setComponents([
-      ...components,
-      { name: "", brand_name: "", model: "", quantity: "", unit_price: "" },
+  const addRow = () =>
+    setBundleComponents([
+      ...bundleComponents,
+      { component_id: "", quantity: 1, unit_price_override: "" },
     ]);
+
+  const removeRow = (idx) => {
+    if (bundleComponents.length === 1) return;
+    setBundleComponents(bundleComponents.filter((_, i) => i !== idx));
   };
 
-  const removeComponentRow = (index) => {
-    if (components.length === 1) return; // keep at least one row
-    setComponents(components.filter((_, i) => i !== index));
+  /* ---------------- CREATE PRODUCT ---------------- */
+
+  const createProduct = async () => {
+    if (!form.starter_type || !form.rating_kw)
+      return alert("Starter type & rating required");
+
+    const payload = {
+      starter_type: form.starter_type,
+      rating_kw: Number(form.rating_kw),
+      components: bundleComponents
+        .filter((c) => c.component_id)
+        .map((c) => ({
+          component_id: Number(c.component_id),
+          quantity: Number(c.quantity || 1),
+          unit_price_override: c.unit_price_override
+            ? Number(c.unit_price_override)
+            : null,
+        })),
+    };
+
+    if (!payload.components.length)
+      return alert("Add at least one component");
+
+    const res = await axios.post(`${API_URL}/products`, payload, {
+      headers: authHeaders,
+    });
+
+    setProducts((p) => [...p, res.data]);
+    setForm({ starter_type: "", rating_kw: "" });
+    setBundleComponents([{ component_id: "", quantity: 1, unit_price_override: "" }]);
   };
 
-  const addBundle = async () => {
-    // basic validation – GST removed
-    if (!newBundle.starter_type || !newBundle.rating_kw) {
-      alert("Please fill Starter type and Rating (kW)");
-      return;
-    }
-
-    const cleanedComponents = components
-      .filter((c) => c.name && c.brand_name && c.unit_price)
-      .map((c) => ({
-        name: c.name,
-        brand_name: c.brand_name,
-        model: c.model || null,
-        quantity: c.quantity ? parseInt(c.quantity, 10) : 1,
-        unit_price: parseFloat(c.unit_price),
-      }));
-
-    if (cleanedComponents.length === 0) {
-      alert("Please add at least one valid component!");
-      return;
-    }
-
-    try {
-      const payload = {
-        starter_type: newBundle.starter_type,
-        rating_kw: parseFloat(newBundle.rating_kw),
-        components: cleanedComponents,
-      };
-
-      const res = await axios.post(`${API_URL}/products`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setBundles((prev) => [...prev, res.data]);
-
-      // reset form
-      setNewBundle({ starter_type: "", rating_kw: "" });
-      setComponents([
-        { name: "", brand_name: "", model: "", quantity: "", unit_price: "" },
-      ]);
-
-      alert("Bundle added successfully!");
-    } catch (err) {
-      alert(err.response?.data?.detail || "Adding bundle failed!");
-    }
-  };
-
-  const deleteBundle = async (id) => {
-    if (!window.confirm("Delete this bundle?")) return;
-    try {
-      await axios.delete(`${API_URL}/products/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setBundles((prev) => prev.filter((b) => b.id !== id));
-    } catch (err) {
-      alert(err.response?.data?.detail || "Delete failed!");
-    }
-  };
-
-  const toggleExpand = (id) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  };
+  /* ---------------- UI ---------------- */
 
   return (
-    <div className="flex min-h-screen bg-black/50 border-2 border-white/20 rounded-lg text-white overflow-y-auto mt-10">
+    <div className="flex min-h-screen bg-black/60 text-white">
       <Sidebar />
-
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1">
         <AdminNavbar />
 
-        <div className="p-6 text-lg">
-          <h2 className="text-2xl font-bold mb-4 text-center">Product Management</h2>
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-4">Product Management</h2>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          {loading && <p>Loading...</p>}
-
-          {/* Add Bundle Form */}
-          <div className="mb-6 bg-white/10 p-4 rounded">
-            <h3 className="font-bold mb-3">Add New Starter Bundle</h3>
-
-            {/* Starter / Rating fields (GST removed) */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
+          {/* ADD PRODUCT */}
+          <div className="bg-white/10 p-4 rounded mb-6">
+            <div className="grid grid-cols-2 gap-3 mb-3">
               <select
-                name="starter_type"
-                value={newBundle.starter_type}
-                onChange={handleBundleChange}
-                className="bg-white/20 px-3 py-2 rounded outline-none"
+                value={form.starter_type}
+                onChange={(e) =>
+                  setForm({ ...form, starter_type: e.target.value })
+                }
+                className="bg-white/20 p-2 rounded"
               >
-                <option value="">Starter Type (DOL/RDOL/S/D)</option>
-                <option value="DOL">DOL</option>
-                <option value="RDOL">RDOL</option>
-                <option value="S/D">S/D</option>
+                <option value="" className='text-black bg-white'>Starter Type</option>
+                <option className="text-black bg-white">DOL</option>
+                <option className="text-black bg-white">RDOL</option>
+                <option className="text-black bg-white">S/D</option>
               </select>
 
               <input
-                name="rating_kw"
                 placeholder="Rating (kW)"
-                value={newBundle.rating_kw}
-                onChange={handleBundleChange}
-                className="bg-white/20 px-3 py-2 rounded outline-none"
+                value={form.rating_kw}
+                onChange={(e) =>
+                  setForm({ ...form, rating_kw: e.target.value })
+                }
+                className="bg-white/20 p-2 rounded"
               />
             </div>
 
-            {/* Components input */}
-            <h4 className="font-semibold mb-2 text-sm">
-              Components in this bundle
-            </h4>
-            <div className="grid grid-cols-2 gap-3">
-              {components.map((c, index) => (
-                <div
-                  key={index}
-                  className="bg-white/10 p-2 rounded flex flex-col gap-1"
+            <h4 className="text-sm font-semibold mb-2">Components</h4>
+
+            {bundleComponents.map((row, idx) => (
+              <div key={idx} className="flex gap-2 mb-2">
+                <select
+                  value={row.component_id}
+                  onChange={(e) =>
+                    updateComponentRow(idx, "component_id", e.target.value)
+                  }
+                  className="bg-white/20 p-2 rounded flex-1"
                 >
-                  <input
-                    placeholder="Component Name"
-                    value={c.name}
-                    onChange={(e) =>
-                      handleComponentChange(index, "name", e.target.value)
-                    }
-                    className="bg-white/20 px-2 py-1 rounded outline-none text-sm"
-                  />
-                  <input
-                    placeholder="Brand"
-                    value={c.brand_name}
-                    onChange={(e) =>
-                      handleComponentChange(index, "brand_name", e.target.value)
-                    }
-                    className="bg-white/20 px-2 py-1 rounded outline-none text-sm"
-                  />
-                  <input
-                    placeholder="Model (optional)"
-                    value={c.model}
-                    onChange={(e) =>
-                      handleComponentChange(index, "model", e.target.value)
-                    }
-                    className="bg-white/20 px-2 py-1 rounded outline-none text-sm"
-                  />
+                  <option value="" className="text-black bg-white">Select Component</option>
+                  {componentsMaster.map((c) => (
+                    <option key={c.id} value={c.id} className="text-black bg-white">
+                      {c.name} | {c.brand_name} {c.model || ""}
+                    </option>
+                  ))}
+                </select>
 
-                  <div className="flex gap-2">
-                    <input
-                      placeholder="Qty"
-                      value={c.quantity}
-                      onChange={(e) =>
-                        handleComponentChange(index, "quantity", e.target.value)
-                      }
-                      className="bg-white/20 px-2 py-1 rounded outline-none text-sm w-1/3"
-                    />
-                    <input
-                      placeholder="Unit Price"
-                      value={c.unit_price}
-                      onChange={(e) =>
-                        handleComponentChange(index, "unit_price", e.target.value)
-                      }
-                      className="bg-white/20 px-2 py-1 rounded outline-none text-sm w-2/3"
-                    />
-                  </div>
+                <input
+                  type="number"
+                  min={1}
+                  value={row.quantity}
+                  onChange={(e) =>
+                    updateComponentRow(idx, "quantity", e.target.value)
+                  }
+                  className="bg-white/20 p-2 rounded w-20"
+                />
 
-                  <button
-                    type="button"
-                    onClick={() => removeComponentRow(index)}
-                    className="mt-1 text-xs text-red-300 hover:text-red-400 self-end"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
+                <input
+                  placeholder="Override Price"
+                  value={row.unit_price_override}
+                  onChange={(e) =>
+                    updateComponentRow(idx, "unit_price_override", e.target.value)
+                  }
+                  className="bg-white/20 p-2 rounded w-32"
+                />
+
+                <button
+                  onClick={() => removeRow(idx)}
+                  className="text-red-400"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+
+            <div className="flex items-center justify-between">
+            <button onClick={addRow} className="text-green-400 border border-green-400 text-sm mt-2 p-2 rounded cursor-pointer">
+              + Add Component
+            </button>
+
+            <button
+              onClick={createProduct}
+              className="mt-4 bg-green-600 px-4 py-2 rounded cursor-pointer"
+            >
+              Create Bundle
+            </button>
             </div>
-
-            <button
-              type="button"
-              onClick={addComponentRow}
-              className="mt-3 text-sm text-green-400 hover:text-green-300 cursor-pointer transition-all hover:border hover:border-green-400 hover:rounded inline-block px-4 py-2 mr-5"
-            >
-              + Add Component Row
-            </button>
-
-            <button
-              onClick={addBundle}
-              className="mt-4 text-sm bg-green-600 px-4 py-2 rounded cursor-pointer hover:bg-green-500 transition-all"
-            >
-              Add Bundle
-            </button>
           </div>
 
-          {/* Bundles table */}
-          <table className="w-full border border-gray-800 text-sm mt-4">
-            <thead className="bg-gray-800">
-              <tr>
-                <th className="p-2 text-left">Starter Type</th>
-                <th className="p-2 text-left">Rating</th>
-                <th className="p-2 text-left">Total Price</th>
-                <th className="p-2 text-left">Actions</th>
-              </tr>
-            </thead>
+          {/* PRODUCT LIST */}
+          {products.map((p) => (
+            <div key={p.id} className="mb-3 border border-white/10 rounded">
+              <div
+                className="p-3 cursor-pointer hover:bg-white/5"
+                onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
+              >
+                {p.starter_type} — {p.rating_kw} kW — ₹{p.total_price}
+              </div>
 
-            <tbody>
-              {bundles.map((b) => (
-                <React.Fragment key={b.id}>
-                  <tr
-                    className="border-b border-gray-700 cursor-pointer hover:bg-white/5"
-                    onClick={() => toggleExpand(b.id)}
-                  >
-                    <td className="p-2">{b.starter_type}</td>
-                    <td className="p-2">{b.rating_kw} kW</td>
-                    <td className="p-2">₹{b.total_price}</td>
-                    <td className="p-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteBundle(b.id);
-                        }}
-                        className="px-2 py-1 bg-red-600 rounded text-sm"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-
-                  {expandedId === b.id && (
-                    <tr className="border-b border-gray-700">
-                      <td colSpan={4} className="p-3 bg-black/60">
-                        <p className="font-semibold mb-2 text-sm">
-                          Components
-                        </p>
-
-                        {b.components?.length > 0 ? (
-                          <div className="space-y-2">
-                            {b.components.map((c) => (
-                              <div
-                                key={c.id}
-                                className="flex justify-between items-center bg-white/5 px-3 py-2 rounded"
-                              >
-                                <div className="text-xs">
-                                  <strong>{c.name}</strong> — {c.brand_name}
-                                  {c.model && ` (${c.model})`}
-                                  <div className="text-gray-300">
-                                    Qty: {c.quantity} | Unit: ₹{c.unit_price} |
-                                    Line: ₹{c.line_total}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-gray-400 text-xs">
-                            No components found.
-                          </p>
-                        )}
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
+              {expandedId === p.id && (
+                <div className="p-3 bg-black/40 text-sm">
+                  {p.components.map((c) => (
+                    <div key={c.id}>
+                      {c.name} | {c.brand_name} | Qty {c.quantity} | ₹
+                      {c.unit_price}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>

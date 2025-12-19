@@ -1,28 +1,20 @@
-# app/schemas/product.py
 from pydantic import BaseModel, Field
 from typing import Optional, List, Literal
 
 class ProductComponentCreate(BaseModel):
-    name: str
-    brand_name: str
-    model: Optional[str] = None
+    component_id: int
     quantity: int = Field(gt=0)
-    unit_price: float = Field(gt=0)
-
-class ProductComponentUpdate(BaseModel):
-    quantity: Optional[int] = Field(default=None, gt=0)
-    unit_price: Optional[float] = Field(default=None, gt=0)
+    unit_price_override: Optional[float] = Field(default=None, gt=0)
 
 class ProductComponentOut(BaseModel):
     id: int
-    name: str
-    brand_name: str
-    model: Optional[str]
     quantity: int
     unit_price: float
     line_total: float
 
-    model_config = {"from_attributes": True}
+    name: str
+    brand_name: str
+    model: Optional[str]
 
 class ProductCreate(BaseModel):
     starter_type: Literal["DOL", "RDOL", "S/D"]
@@ -39,6 +31,4 @@ class ProductOut(BaseModel):
     rating_kw: float
     base_price: float
     total_price: float
-    components: List[ProductComponentOut] = []
-
-    model_config = {"from_attributes": True}
+    components: List[ProductComponentOut]

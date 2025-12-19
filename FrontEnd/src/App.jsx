@@ -14,6 +14,7 @@ import BillsAdmin from "./pages/admin/BillsAdmin";
 import AdminSettings from "./pages/admin/AdminSettings";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Unauthorized from "./pages/Unauthorized";
+import ComponentsAdmin from "./pages/admin/ComponentsAdmin";
 
 const App = () => {
   return (
@@ -67,6 +68,8 @@ const App = () => {
           }
         />
         <Route path='/unauthorized' element={<Unauthorized />} />
+        <Route path="/admin/components" element={<ComponentsAdmin />} />
+
       </Routes>
       <Footer />
     </div>

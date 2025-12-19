@@ -54,7 +54,7 @@ def get_current_user(
             detail="Invalid authentication",
         )
 
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.email == email, User.is_active == True).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -97,3 +97,32 @@ def approve_user(
         "user_id": user.id,
         "email": user.email,
     }
+
+
+# -------------------------
+#  ADMIN DASHBOARD STATS
+# -------------------------
+from app.models.product import Product
+from app.models.bill import Bill
+
+@router.get("/dashboard-stats")
+def get_dashboard_stats(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    pending_users = (
+        db.query(User)
+        .filter(User.role == "user", User.is_active == False)  # noqa
+        .count()
+    )
+
+    total_users = db.query(User).filter(User.role == "user").count()
+    total_products = db.query(Product).count()
+    total_bills = db.query(Bill).count()
+
+    return {
+        "pending_users": pending_users,
+        "total_users": total_users,
+        "products_count": total_products,
+        "bills_count": total_bills,
+    }
