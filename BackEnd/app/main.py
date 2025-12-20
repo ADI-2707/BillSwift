@@ -17,9 +17,7 @@ from app.routers.admin_bill import router as admin_bill_router
 from app.routers.component import admin_router
 
 
-# -------------------------------------------------
 # CREATE DEFAULT ADMIN
-# -------------------------------------------------
 def create_default_admin():
     db = SessionLocal()
     try:
@@ -48,16 +46,15 @@ def create_default_admin():
         db.close()
 
 
-# -------------------------------------------------
+
 # APP FACTORY
-# -------------------------------------------------
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.APP_NAME,
         version="0.1.0",
     )
 
-    # ------------------ CORS ------------------
+    # CORS
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[
@@ -69,23 +66,23 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # ------------------ STARTUP ------------------
+    # STARTUP
     @app.on_event("startup")
     def on_startup():
         Base.metadata.create_all(bind=engine)
         create_default_admin()
 
-    # ------------------ ROUTERS ------------------
+    # ROUTERS
     app.include_router(auth_router)
     app.include_router(product_router)
     app.include_router(bill_router)
     app.include_router(admin_user_router)
     app.include_router(admin_bill_router)
 
-    # ✅ COMPONENT ROUTERS (THIS FIXES YOUR ISSUE)
+    # COMPONENT ROUTERS (THIS FIXES YOUR ISSUE)
     app.include_router(admin_router)   # /admin/components
 
-    # ------------------ HEALTH ------------------
+    # HEALTH
     @app.get("/health")
     async def health_check():
         return {"status": "ok", "env": settings.APP_ENV}

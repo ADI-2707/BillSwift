@@ -9,17 +9,15 @@ from app.auth.jwt_handler import require_admin
 from app.models.user import User
 from app.schemas.component import ComponentOut
 
-# ============================
+
 # ADMIN ROUTER
-# ============================
 admin_router = APIRouter(
     prefix="/admin/components",
     tags=["Admin Components"]
 )
 
-# ============================
+
 # SCHEMAS
-# ============================
 class ComponentCreate(BaseModel):
     name: str
     brand_name: str
@@ -29,9 +27,8 @@ class ComponentCreate(BaseModel):
 class ComponentUpdate(ComponentCreate):
     pass
 
-# ============================
+
 # ADMIN: LIST
-# ============================
 @admin_router.get("/", response_model=list[ComponentCreate])
 def list_components_admin(
     db: Session = Depends(get_db),
@@ -39,9 +36,8 @@ def list_components_admin(
 ):
     return db.query(Component).order_by(Component.name).all()
 
-# ============================
+
 # ADMIN: CREATE
-# ============================
 @admin_router.post("/")
 def create_component(
     payload: ComponentCreate,
@@ -72,9 +68,8 @@ def create_component(
     db.refresh(component)
     return component
 
-# ============================
+
 # ADMIN: UPDATE
-# ============================
 @admin_router.put("/{component_id}")
 def update_component(
     component_id: int,
@@ -95,9 +90,8 @@ def update_component(
     db.refresh(component)
     return component
 
-# ============================
+
 # ADMIN: DELETE
-# ============================
 @admin_router.delete("/{component_id}")
 def delete_component(
     component_id: int,
@@ -117,9 +111,8 @@ def delete_component(
     db.commit()
     return {"detail": "Component deleted"}
 
-# ============================
+
 # ADMIN: SEARCH COMPONENTS (for autocomplete)
-# ============================
 @admin_router.get("/search")
 def search_components(
     q: str,

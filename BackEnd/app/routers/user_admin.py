@@ -7,9 +7,8 @@ from app.auth.jwt_handler import require_admin
 router = APIRouter(prefix="/admin/users", tags=["Admin Users"])
 
 
-# -------------------------
+
 #  GET PENDING USERS
-# -------------------------
 @router.get("/pending")
 def get_pending_users(
     db: Session = Depends(get_db),
@@ -39,9 +38,8 @@ def get_pending_users(
     ]
 
 
-# -------------------------
+
 #  GET ALL USERS
-# -------------------------
 @router.get("/all")
 def get_all_users(
     db: Session = Depends(get_db),
@@ -68,9 +66,7 @@ def get_all_users(
     ]
 
 
-# -------------------------
 #  APPROVE USER
-# -------------------------
 @router.put("/{user_id}/approve")
 def approve_user(
     user_id: int,
@@ -99,9 +95,8 @@ def approve_user(
     }
 
 
-# -------------------------
+
 #  ADMIN DASHBOARD STATS
-# -------------------------
 from app.models.product import Product
 from app.models.bill import Bill
 
