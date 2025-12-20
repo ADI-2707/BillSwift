@@ -7,6 +7,7 @@ from app.db.session import get_db
 from app.models.component import Component
 from app.auth.jwt_handler import require_admin
 from app.models.user import User
+from app.schemas.component import ComponentOut
 
 # ============================
 # ADMIN ROUTER
@@ -17,62 +18,30 @@ admin_router = APIRouter(
 )
 
 # ============================
-# PUBLIC / INTERNAL ROUTER
+# SCHEMAS
 # ============================
-public_router = APIRouter(
-    prefix="/components",
-    tags=["Components"]
-)
-
-# -----------------------------
-# Schemas
-# -----------------------------
 class ComponentCreate(BaseModel):
     name: str
     brand_name: str
     model: str | None = None
     base_unit_price: float
 
+class ComponentUpdate(ComponentCreate):
+    pass
 
-class ComponentUpdate(BaseModel):
-    name: str
-    brand_name: str
-    model: str | None = None
-    base_unit_price: float
-
-
-# =====================================================
-# PUBLIC READ (USED BY PRODUCT PAGE DROPDOWN)
-# =====================================================
-@public_router.get("/")
-def list_components_public(
-    db: Session = Depends(get_db),
-):
-    return (
-        db.query(Component)
-        .order_by(Component.name)
-        .all()
-    )
-
-
-# =====================================================
+# ============================
 # ADMIN: LIST
-# =====================================================
-@admin_router.get("/")
+# ============================
+@admin_router.get("/", response_model=list[ComponentCreate])
 def list_components_admin(
     db: Session = Depends(get_db),
     _: User = Depends(require_admin),
 ):
-    return (
-        db.query(Component)
-        .order_by(Component.name)
-        .all()
-    )
+    return db.query(Component).order_by(Component.name).all()
 
-
-# =====================================================
+# ============================
 # ADMIN: CREATE
-# =====================================================
+# ============================
 @admin_router.post("/")
 def create_component(
     payload: ComponentCreate,
@@ -88,9 +57,8 @@ def create_component(
         )
         .first()
     )
-
     if existing:
-        raise HTTPException(status_code=400, detail="Component already exists")
+        raise HTTPException(400, "Component already exists")
 
     component = Component(
         name=payload.name,
@@ -102,13 +70,11 @@ def create_component(
     db.add(component)
     db.commit()
     db.refresh(component)
-
     return component
 
-
-# =====================================================
+# ============================
 # ADMIN: UPDATE
-# =====================================================
+# ============================
 @admin_router.put("/{component_id}")
 def update_component(
     component_id: int,
@@ -117,9 +83,8 @@ def update_component(
     _: User = Depends(require_admin),
 ):
     component = db.query(Component).filter(Component.id == component_id).first()
-
     if not component:
-        raise HTTPException(status_code=404, detail="Component not found")
+        raise HTTPException(404, "Component not found")
 
     component.name = payload.name
     component.brand_name = payload.brand_name
@@ -128,13 +93,11 @@ def update_component(
 
     db.commit()
     db.refresh(component)
-
     return component
 
-
-# =====================================================
-# ADMIN: DELETE (SAFE)
-# =====================================================
+# ============================
+# ADMIN: DELETE
+# ============================
 @admin_router.delete("/{component_id}")
 def delete_component(
     component_id: int,
@@ -142,17 +105,51 @@ def delete_component(
     _: User = Depends(require_admin),
 ):
     component = db.query(Component).filter(Component.id == component_id).first()
-
     if not component:
-        raise HTTPException(status_code=404, detail="Component not found")
+        raise HTTPException(404, "Component not found")
 
     if component.product_components:
         raise HTTPException(
-            status_code=400,
-            detail="Component is used in products. Remove it from products first."
+            400, "Component is used in products. Remove it first."
         )
 
     db.delete(component)
     db.commit()
+    return {"detail": "Component deleted"}
 
-    return {"detail": "Component deleted successfully"}
+# ============================
+# ADMIN: SEARCH COMPONENTS (for autocomplete)
+# ============================
+@admin_router.get("/search")
+def search_components(
+    q: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    if len(q.strip()) < 3:
+        return []
+
+    query = q.strip().lower()
+
+    results = (
+        db.query(Component)
+        .filter(
+            (Component.name.ilike(f"%{query}%")) |
+            (Component.brand_name.ilike(f"%{query}%")) |
+            (Component.model.ilike(f"%{query}%"))
+        )
+        .order_by(Component.name)
+        .limit(20)
+        .all()
+    )
+
+    # Return only what frontend needs
+    return [
+        {
+            "id": c.id,
+            "name": c.name,
+            "brand_name": c.brand_name,
+            "model": c.model or "",
+        }
+        for c in results
+    ]

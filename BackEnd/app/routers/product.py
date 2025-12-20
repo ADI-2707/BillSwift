@@ -6,13 +6,15 @@ from app.db.session import get_db
 from app.models.product import Product
 from app.models.product_component import ProductComponent
 from app.models.component import Component
-from app.schemas.product import ProductCreate, ProductOut
+from app.schemas.product import ProductCreate, ProductOut, ProductComponentOut
 from app.auth.jwt_handler import require_admin
 from app.models.user import User
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
-def _recalculate_prices(product: Product):
+
+def serialize_product(product: Product) -> ProductOut:
+    components = []
     base = Decimal("0.00")
 
     for pc in product.components:
@@ -21,11 +23,30 @@ def _recalculate_prices(product: Product):
             if pc.unit_price_override is not None
             else pc.component.base_unit_price
         )
-        base += unit_price * pc.quantity
+        line_total = unit_price * pc.quantity
+        base += line_total
 
-    product.base_price = base
-    product.total_price = base
-    product.price = base
+        components.append(
+            ProductComponentOut(
+                id=pc.id,
+                quantity=pc.quantity,
+                unit_price=float(unit_price),
+                line_total=float(line_total),
+                name=pc.component.name,
+                brand_name=pc.component.brand_name,
+                model=pc.component.model,
+            )
+        )
+
+    return ProductOut(
+        id=product.id,
+        starter_type=product.starter_type,
+        rating_kw=float(product.rating_kw),
+        base_price=float(base),
+        total_price=float(base),
+        components=components,
+    )
+
 
 @router.post("/", response_model=ProductOut)
 def create_product_bundle(
@@ -40,32 +61,33 @@ def create_product_bundle(
     )
 
     for item in payload.components:
-        component = db.query(Component).filter(Component.id == item.component_id).first()
+        component = db.query(Component).get(item.component_id)
         if not component:
             raise HTTPException(404, "Component not found")
 
-        pc = ProductComponent(
-            component=component,
-            quantity=item.quantity,
-            unit_price_override=(
-                Decimal(str(item.unit_price_override))
-                if item.unit_price_override
-                else None
-            ),
+        product.components.append(
+            ProductComponent(
+                component=component,
+                quantity=item.quantity,
+                unit_price_override=(
+                    Decimal(str(item.unit_price_override))
+                    if item.unit_price_override
+                    else None
+                ),
+            )
         )
-        product.components.append(pc)
-
-    _recalculate_prices(product)
 
     db.add(product)
     db.commit()
     db.refresh(product)
 
-    return product
+    return serialize_product(product)
+
 
 @router.get("/", response_model=list[ProductOut])
 def list_products(
     db: Session = Depends(get_db),
     _: User = Depends(require_admin),
 ):
-    return db.query(Product).all()
+    products = db.query(Product).all()
+    return [serialize_product(p) for p in products]

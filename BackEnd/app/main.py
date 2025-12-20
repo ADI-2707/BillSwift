@@ -14,9 +14,7 @@ from app.routers.product import router as product_router
 from app.routers.bill import router as bill_router
 from app.routers.user_admin import router as admin_user_router
 from app.routers.admin_bill import router as admin_bill_router
-
-# ✅ IMPORT BOTH COMPONENT ROUTERS
-from app.routers.component import admin_router, public_router
+from app.routers.component import admin_router
 
 
 # -------------------------------------------------
@@ -86,7 +84,6 @@ def create_app() -> FastAPI:
 
     # ✅ COMPONENT ROUTERS (THIS FIXES YOUR ISSUE)
     app.include_router(admin_router)   # /admin/components
-    app.include_router(public_router)  # /components
 
     # ------------------ HEALTH ------------------
     @app.get("/health")
