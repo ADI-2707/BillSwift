@@ -91,3 +91,22 @@ def list_products(
 ):
     products = db.query(Product).all()
     return [serialize_product(p) for p in products]
+
+
+@router.delete("/{product_id}")
+async def delete_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(404, "Product not found")
+
+    # Check if product is used in any bill items
+    if product.bill_items:
+        raise HTTPException(400, "Cannot delete product used in bills")
+
+    db.delete(product)
+    db.commit()
+    return {"detail": "Product deleted"}

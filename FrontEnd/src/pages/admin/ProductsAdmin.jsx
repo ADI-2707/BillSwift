@@ -177,6 +177,31 @@ const ProductsAdmin = () => {
     setRows([{ ...emptyRow }]);
   };
 
+  /* ---------------- DELETE PRODUCT ---------------- */
+  const deleteProduct = async (productId) => {
+    const confirmed = window.confirm(
+      "This will permanently delete the product. Do you want to delete it?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`${API_URL}/products/${productId}`, {
+        headers: authHeaders,
+      });
+
+      // Remove from local state
+      setProducts((prev) => prev.filter((p) => p.id !== productId));
+
+      // If it was expanded, close it
+      if (expandedId === productId) {
+        setExpandedId(null);
+      }
+    } catch (err) {
+      alert("Failed to delete product. It might be used in bills.");
+    }
+  };
+
   /* ---------------- UI ---------------- */
 
   return (
@@ -316,20 +341,39 @@ const ProductsAdmin = () => {
           </div>
 
           {products.map((p) => (
-            <div key={p.id} className="mb-3 border border-white/10 rounded">
-              <div
-                className="p-3 cursor-pointer hover:bg-white/5"
-                onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
-              >
-                {p.starter_type} — {p.rating_kw} kW — ₹{p.total_price}
+            <div
+              key={p.id}
+              className="mb-3 border border-white/10 rounded relative"
+            >
+              <div className="flex items-center justify-between">
+                <div
+                  className="p-3 cursor-pointer hover:bg-white/5 flex-1 pr-10"
+                  onClick={() =>
+                    setExpandedId(expandedId === p.id ? null : p.id)
+                  }
+                >
+                  {p.starter_type} — {p.rating_kw} kW — ₹{p.total_price}
+                </div>
+
+                {/* Delete Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent expanding the card when clicking delete
+                    deleteProduct(p.id);
+                  }}
+                  className="absolute top-3 right-3 text-red-400 hover:text-red-300 text-lg font-bold"
+                  title="Delete this product bundle"
+                >
+                  ✕
+                </button>
               </div>
 
               {expandedId === p.id && (
-                <div className="p-3 bg-black/40 text-sm">
+                <div className="p-3 bg-black/40 text-sm border-t border-white/10">
                   {p.components.map((c) => (
                     <div key={c.id}>
-                      {c.name} | {c.brand_name} | Qty {c.quantity} | ₹
-                      {c.unit_price}
+                      {c.name} | {c.brand_name} {c.model ? `| ${c.model}` : ""}{" "}
+                      | Qty {c.quantity} | ₹{c.unit_price}
                     </div>
                   ))}
                 </div>
