@@ -27,7 +27,6 @@ const ComponentsAdmin = () => {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(EMPTY_FORM);
 
-  // ---------------- AUTH ----------------
   useEffect(() => {
     if (!token) {
       navigate("/login");
@@ -40,7 +39,6 @@ const ComponentsAdmin = () => {
     fetchComponents();
   }, [token, role, navigate]);
 
-  // ---------------- FETCH ----------------
   const fetchComponents = async () => {
     try {
       const res = await axios.get(`${API_URL}/admin/components/`, { headers });
@@ -50,14 +48,13 @@ const ComponentsAdmin = () => {
     }
   };
 
-  // ---------------- CREATE ----------------
   const addComponent = async () => {
     if (
       !newComponent.name.trim() ||
       !newComponent.brand_name.trim() ||
       !newComponent.base_unit_price
     ) {
-      alert("Name, Brand and Price required");
+      alert("Name, Brand and Price are required");
       return;
     }
 
@@ -75,41 +72,68 @@ const ComponentsAdmin = () => {
       fetchComponents();
     } catch (err) {
       console.error("Add component failed", err);
+      alert("Failed to add component");
     }
   };
 
-  // ---------------- UPDATE ----------------
-  const saveEdit = async (id) => {
+  const startEdit = (component) => {
+    setEditingId(component.id);
+    setEditForm({
+      name: component.name || "",
+      brand_name: component.brand_name || "",
+      model: component.model || "",
+      base_unit_price: component.base_unit_price?.toString() || "",
+    });
+  };
+
+  const saveEdit = async () => {
+    if (
+      !editForm.name.trim() ||
+      !editForm.brand_name.trim() ||
+      !editForm.base_unit_price
+    ) {
+      alert("Name, Brand and Price are required");
+      return;
+    }
+
     try {
       await axios.put(
-        `${API_URL}/admin/components/${id}`,
+        `${API_URL}/admin/components/${editingId}`,
         {
           ...editForm,
           base_unit_price: Number(editForm.base_unit_price),
         },
         { headers }
       );
+
       setEditingId(null);
       setEditForm(EMPTY_FORM);
       fetchComponents();
     } catch (err) {
-      console.error("Update component failed", err);
+      console.error("Update failed", err);
+      alert("Failed to update component");
     }
   };
 
-  // ---------------- DELETE ----------------
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditForm(EMPTY_FORM);
+  };
+
   const deleteComponent = async (id) => {
-    if (!window.confirm("Delete this component?")) return;
+    if (!window.confirm("Delete this component permanently?")) return;
+
     try {
       await axios.delete(`${API_URL}/admin/components/${id}`, { headers });
       fetchComponents();
     } catch (err) {
-      console.error("Delete component failed", err);
+      console.error("Delete failed", err);
+      alert("Cannot delete: component is used in products");
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-black/60 text-white">
+    <div className="flex min-h-screen bg-black/60 text-white border-2 border-white/20 rounded-lg mt-10">
       <Sidebar />
       <div className="flex-1">
         <AdminNavbar />
@@ -119,35 +143,32 @@ const ComponentsAdmin = () => {
             Components Management
           </h2>
 
-          {/* ADD */}
+          {/* ADD NEW COMPONENT */}
           <div className="bg-white/10 p-4 rounded mb-6">
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-3 mb-4">
               <input
                 placeholder="Name"
                 value={newComponent.name}
                 onChange={(e) =>
                   setNewComponent({ ...newComponent, name: e.target.value })
                 }
-                className="bg-black/40 p-2 rounded"
+                className="bg-black/40 p-2 rounded text-white placeholder-gray-400"
               />
               <input
                 placeholder="Brand"
                 value={newComponent.brand_name}
                 onChange={(e) =>
-                  setNewComponent({
-                    ...newComponent,
-                    brand_name: e.target.value,
-                  })
+                  setNewComponent({ ...newComponent, brand_name: e.target.value })
                 }
-                className="bg-black/40 p-2 rounded"
+                className="bg-black/40 p-2 rounded text-white placeholder-gray-400"
               />
               <input
-                placeholder="Model"
+                placeholder="Model (optional)"
                 value={newComponent.model}
                 onChange={(e) =>
                   setNewComponent({ ...newComponent, model: e.target.value })
                 }
-                className="bg-black/40 p-2 rounded"
+                className="bg-black/40 p-2 rounded text-white placeholder-gray-400"
               />
               <input
                 type="number"
@@ -159,107 +180,81 @@ const ComponentsAdmin = () => {
                     base_unit_price: e.target.value,
                   })
                 }
-                className="bg-black/40 p-2 rounded"
+                className="bg-black/40 p-2 rounded text-white placeholder-gray-400"
               />
             </div>
-
             <button
               onClick={addComponent}
-              className="mt-4 bg-green-600 px-4 py-2 rounded"
+              className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded transition"
             >
               Add Component
             </button>
           </div>
 
-          {/* LIST */}
+          {/* COMPONENTS LIST */}
           <div className="space-y-2">
             {components.map((c, index) => (
               <div
-                key={c.id ?? `${c.name}-${c.brand_name}-${index}`}
-                className="flex justify-between items-center bg-white/10 p-3 rounded"
+                key={`${c.id}-${index}`} // Yeh key abhi bhi sahi hai
+                className="bg-white/10 p-4 rounded flex items-center justify-between gap-4"
               >
                 {editingId === c.id ? (
-                  <div className="flex justify-between w-full">
-                    <div className="flex gap-2">
-                      <input
-                        value={editForm.name || ""}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, name: e.target.value })
-                        }
-                        className="bg-black/40 p-1 rounded"
-                      />
-                      <input
-                        value={editForm.brand_name || ""}
-                        onChange={(e) =>
-                          setEditForm({
-                            ...editForm,
-                            brand_name: e.target.value,
-                          })
-                        }
-                        className="bg-black/40 p-1 rounded"
-                      />
-                      <input
-                        value={editForm.model || ""}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, model: e.target.value })
-                        }
-                        className="bg-black/40 p-1 rounded"
-                      />
-                      <input
-                        type="number"
-                        value={editForm.base_unit_price || ""}
-                        onChange={(e) =>
-                          setEditForm({
-                            ...editForm,
-                            base_unit_price: e.target.value,
-                          })
-                        }
-                        className="bg-black/40 p-1 rounded w-24"
-                      />
-                    </div>
-
+                  <div className="flex w-full items-center gap-3">
+                    <input
+                      value={editForm.name}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, name: e.target.value })
+                      }
+                      className="bg-black/40 p-2 rounded flex-1 text-white"
+                      autoFocus
+                    />
+                    <input
+                      value={editForm.brand_name}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, brand_name: e.target.value })
+                      }
+                      className="bg-black/40 p-2 rounded flex-1 text-white"
+                    />
+                    <input
+                      value={editForm.model}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, model: e.target.value })
+                      }
+                      className="bg-black/40 p-2 rounded flex-1 text-white"
+                    />
+                    <input
+                      type="number"
+                      value={editForm.base_unit_price}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          base_unit_price: e.target.value,
+                        })
+                      }
+                      className="bg-black/40 p-2 rounded w-32 text-white"
+                    />
                     <div className="flex gap-3">
-                      <button onClick={() => saveEdit(c.id)}>
-                        <FiCheck className="text-green-400" />
+                      <button onClick={saveEdit}>
+                        <FiCheck className="text-green-400 text-xl" />
                       </button>
-                      <button
-                        onClick={() => {
-                          setEditingId(null);
-                          setEditForm(EMPTY_FORM);
-                        }}
-                      >
-                        <FiX className="text-red-400" />
+                      <button onClick={cancelEdit}>
+                        <FiX className="text-red-400 text-xl" />
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-between w-full">
+                  <div className="flex w-full justify-between items-center">
                     <div>
                       <strong>{c.name}</strong> | {c.brand_name}
-                      {c.model && ` (${c.model})`}
+                      {c.model && ` | ${c.model}`}
                     </div>
-
-                    <div className="flex gap-4 items-center">
-                      <span>₹{c.base_unit_price}</span>
-                      <button
-                        onClick={() => {
-                          setEditingId(c.id);
-                          setEditForm({
-                            name: c.name || "",
-                            brand_name: c.brand_name || "",
-                            model: c.model || "",
-                            base_unit_price: c.base_unit_price || "",
-                          });
-                        }}
-                      >
-                        <FiEdit2 />
+                    <div className="flex items-center gap-6">
+                      <span className="font-medium">₹{c.base_unit_price}</span>
+                      <button onClick={() => startEdit(c)}>
+                        <FiEdit2 className="text-blue-400" />
                       </button>
-                      <button
-                        disabled={!c.id}
-                        onClick={() => c.id && deleteComponent(c.id)}
-                        title={!c.id ? "Cannot delete: missing ID" : "Delete"}
-                      >
-                        <FiTrash2 className="text-red-500" />
+                      <button onClick={() => deleteComponent(c.id)}>
+                        <FiTrash2 className="text-red-400" />
                       </button>
                     </div>
                   </div>
@@ -268,7 +263,7 @@ const ComponentsAdmin = () => {
             ))}
 
             {components.length === 0 && (
-              <p className="text-gray-400 text-center">
+              <p className="text-center text-gray-400 py-8">
                 No components added yet.
               </p>
             )}

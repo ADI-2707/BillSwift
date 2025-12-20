@@ -66,7 +66,9 @@ const PendingUsers = () => {
       <div className="flex-1 flex flex-col">
         <AdminNavbar />
 
-        <h2 className="text-2xl font-bold mt-6 mb-6 text-center">Pending User Approvals</h2>
+        <h2 className="text-2xl font-bold mt-6 mb-6 text-center">
+          Pending User Approvals
+        </h2>
 
         {loading && <p>Loading users...</p>}
         {error && <p className="text-red-500 text-sm">{error}</p>}

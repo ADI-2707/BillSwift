@@ -205,13 +205,13 @@ const ProductsAdmin = () => {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="flex min-h-screen bg-black/60 text-white">
+    <div className="flex min-h-screen bg-black/60 text-white border-2 border-white/20 rounded-lg mt-10">
       <Sidebar />
       <div className="flex-1">
         <AdminNavbar />
 
         <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4">Product Management</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center">Product Management</h2>
 
           <div className="bg-white/10 p-4 rounded mb-6">
             <div className="grid grid-cols-2 gap-3 mb-4">
