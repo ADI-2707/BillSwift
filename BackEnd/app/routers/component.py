@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from decimal import Decimal
-from pydantic import BaseModel
 
 from app.db.session import get_db
 from app.models.component import Component
 from app.auth.jwt_handler import require_admin
 from app.models.user import User
-from app.schemas.component import ComponentOut
-
+# Import the schemas we fixed earlier
+from app.schemas.component import ComponentOut, ComponentCreate, ComponentUpdate
 
 # ADMIN ROUTER
 admin_router = APIRouter(
@@ -16,29 +15,16 @@ admin_router = APIRouter(
     tags=["Admin Components"]
 )
 
-
-# SCHEMAS
-class ComponentCreate(BaseModel):
-    name: str
-    brand_name: str
-    model: str | None = None
-    base_unit_price: float
-
-class ComponentUpdate(ComponentCreate):
-    pass
-
-
 # ADMIN: LIST
-@admin_router.get("/", response_model=list[ComponentCreate])
+@admin_router.get("/", response_model=list[ComponentOut])
 def list_components_admin(
     db: Session = Depends(get_db),
     _: User = Depends(require_admin),
 ):
     return db.query(Component).order_by(Component.name).all()
 
-
 # ADMIN: CREATE
-@admin_router.post("/")
+@admin_router.post("/", response_model=ComponentOut)
 def create_component(
     payload: ComponentCreate,
     db: Session = Depends(get_db),
@@ -61,6 +47,7 @@ def create_component(
         brand_name=payload.brand_name,
         model=payload.model,
         base_unit_price=Decimal(str(payload.base_unit_price)),
+        is_active=payload.is_active  # Uses the default from schema
     )
 
     db.add(component)
@@ -68,9 +55,8 @@ def create_component(
     db.refresh(component)
     return component
 
-
 # ADMIN: UPDATE
-@admin_router.put("/{component_id}")
+@admin_router.put("/{component_id}", response_model=ComponentOut)
 def update_component(
     component_id: int,
     payload: ComponentUpdate,
@@ -85,11 +71,11 @@ def update_component(
     component.brand_name = payload.brand_name
     component.model = payload.model
     component.base_unit_price = Decimal(str(payload.base_unit_price))
+    component.is_active = payload.is_active # This will no longer crash
 
     db.commit()
     db.refresh(component)
     return component
-
 
 # ADMIN: DELETE
 @admin_router.delete("/{component_id}")
@@ -102,7 +88,9 @@ def delete_component(
     if not component:
         raise HTTPException(404, "Component not found")
 
-    if component.product_components:
+    # Check if component is used (Check your model relationship name here)
+    # If the relationship is named 'product_components', this stays as is
+    if hasattr(component, 'product_components') and component.product_components:
         raise HTTPException(
             400, "Component is used in products. Remove it first."
         )
@@ -111,8 +99,7 @@ def delete_component(
     db.commit()
     return {"detail": "Component deleted"}
 
-
-# ADMIN: SEARCH COMPONENTS (for autocomplete)
+# ADMIN: SEARCH COMPONENTS
 @admin_router.get("/search")
 def search_components(
     q: str,
@@ -123,7 +110,6 @@ def search_components(
         return []
 
     query = q.strip().lower()
-
     results = (
         db.query(Component)
         .filter(
@@ -136,7 +122,6 @@ def search_components(
         .all()
     )
 
-    # Return only what frontend needs
     return [
         {
             "id": c.id,
