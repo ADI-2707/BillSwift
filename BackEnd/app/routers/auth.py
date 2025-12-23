@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, LoginRequest, UserOut
 from app.auth.security import hash_password, verify_password
-from app.auth.jwt_handler import create_access_token
+from app.auth.jwt_handler import create_access_token, get_current_user
 from app.core.email_utils import (
     send_new_user_request_email,
     send_user_signup_ack_email,
@@ -12,11 +12,15 @@ from app.core.email_utils import (
 from app.auth.jwt_handler import get_current_user
 from app.schemas.user import UserOut
 from fastapi import Depends
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+limiter = Limiter(key_func=get_remote_address)
 
 @router.post("/signup", response_model=UserOut)
-def signup(payload: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/hour")
+def signup(request: Request, payload: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == payload.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already exists")
@@ -46,7 +50,8 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
     return user
 
 @router.post("/login")
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
 
     if not user or not verify_password(payload.password, user.password_hash):

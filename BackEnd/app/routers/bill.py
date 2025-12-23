@@ -3,7 +3,7 @@ from decimal import Decimal
 from datetime import datetime
 import random
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -13,7 +13,11 @@ from app.models.user import User
 from app.schemas.bill import BillCreate, BillOut, BillDetailOut
 from app.auth.jwt_handler import get_current_user
 
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
 router = APIRouter(prefix="/billing", tags=["Billing"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 def _generate_bill_number(db: Session, user: User) -> str:
@@ -42,7 +46,9 @@ def _generate_bill_number(db: Session, user: User) -> str:
 
 
 @router.post("/", response_model=BillOut)
+@limiter.limit("20/minute")
 def create_bill(
+    request: Request,
     payload: BillCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
