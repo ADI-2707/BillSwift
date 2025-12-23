@@ -56,20 +56,20 @@ const ViewBills = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans pb-20">
+    <div className="min-h-screen bg-[#0a0a0a]/80 text-white font-sans pb-20 border-2 border-white/20 rounded-lg mt-20">
       <div className="max-w-5xl mx-auto p-6 md:p-10">
         <h1 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
           Your Bills
         </h1>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-3">
+          <div className="mb-6 mt-10 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-3">
             <span>⚠️</span> {error}
           </div>
         )}
 
         {data.length === 0 && !error ? (
-          <div className="text-center py-20 bg-[#1a1a1a] rounded-3xl border border-white/5 shadow-xl">
+          <div className="text-center py-20 bg-[#1a1a1a] rounded-3xl border border-white/5 shadow-xl mt-10">
             <p className="text-gray-500 text-lg">No bills found in your history.</p>
             <button 
               onClick={() => navigate("/add-bill")}

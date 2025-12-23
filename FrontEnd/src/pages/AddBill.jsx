@@ -278,7 +278,7 @@ const AddBill = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans pb-20">
+    <div className="min-h-screen bg-[#0a0a0a]/80 mt-20 text-white font-sans pb-20 border-2 border-white/20 rounded-lg">
       <div className="max-w-5xl mx-auto p-6 md:p-10">
         <h1 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
           {editBillId ? "View Bill Details" : "Create New Bill"}
@@ -286,7 +286,7 @@ const AddBill = () => {
 
         {/* Hide Add Bundle section if just viewing */}
         {!editBillId && (
-          <div className="bg-[#1a1a1a] border border-white/10 p-6 rounded-2xl mb-8 shadow-2xl">
+          <div className="bg-[#1a1a1a] border border-white/10 p-6 rounded-2xl mb-8 shadow-2xl mt-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-gray-500 ml-1">
