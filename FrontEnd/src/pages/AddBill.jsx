@@ -1,36 +1,52 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../api/base";
 import * as XLSX from "xlsx";
 
 const AddBill = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // To catch the billId passed from ViewBills
+  const editBillId = location.state?.billId;
 
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
   const [allBundles, setAllBundles] = useState([]);
   const [billBundles, setBillBundles] = useState([]);
+  const [allComponents, setAllComponents] = useState([]);
 
   const [starterFilter, setStarterFilter] = useState("");
   const [ratingFilter, setRatingFilter] = useState("");
   const [billDiscountPercent, setBillDiscountPercent] = useState(0);
+  const [componentSearch, setComponentSearch] = useState("");
+  const [activeBundleId, setActiveBundleId] = useState(null);
 
   const [loading, setLoading] = useState(true);
 
-  const authHeaders = { Authorization: `Bearer ${token}` };
+  const authHeaders = useMemo(
+    () => ({
+      Authorization: `Bearer ${token}`,
+    }),
+    [token]
+  );
 
   /* ---------------- HELPERS ---------------- */
 
   const recalcBundle = (bundle) => {
-    const subtotal = bundle.components.reduce(
+    const components = bundle.components.map((c) => {
+      const disc = Number(c.discount_percent || 0);
+      const discountedPrice = Number(c.base_price) * (1 - disc / 100);
+      return { ...c, unit_price: discountedPrice };
+    });
+
+    const subtotal = components.reduce(
       (sum, c) =>
         sum + Math.max(1, Number(c.quantity || 1)) * Number(c.unit_price || 0),
       0
     );
 
-    return { ...bundle, subtotal, totalAfterDiscount: subtotal };
+    return { ...bundle, components, subtotal, totalAfterDiscount: subtotal };
   };
 
   const billSubtotal = useMemo(
@@ -40,7 +56,6 @@ const AddBill = () => {
 
   const billDiscountAmount =
     Math.max(0, billSubtotal * (Number(billDiscountPercent) || 0)) / 100;
-
   const grandTotal = Math.max(billSubtotal - billDiscountAmount, 0);
 
   /* ---------------- INIT ---------------- */
@@ -49,13 +64,59 @@ const AddBill = () => {
     if (!token) return navigate("/login");
     if (role !== "admin" && role !== "user") return navigate("/unauthorized");
 
-    axios
-      .get(`${API_URL}/products`, { headers: authHeaders })
-      .then((res) => setAllBundles(res.data || []))
-      .finally(() => setLoading(false));
-  }, []);
+    const fetchData = async () => {
+      try {
+        const [prodRes, compRes] = await Promise.all([
+          axios.get(`${API_URL}/products`, { headers: authHeaders }),
+          axios.get(`${API_URL}/components`, { headers: authHeaders }),
+        ]);
+        setAllBundles(prodRes.data || []);
+        setAllComponents(compRes.data || []);
 
-  /* ---------------- ADD BUNDLE ---------------- */
+        // NEW LOGIC: If editing/viewing an existing bill
+        if (editBillId) {
+          const billRes = await axios.get(`${API_URL}/billing/${editBillId}`, {
+            headers: authHeaders,
+          });
+          const billData = billRes.data;
+
+          // Map items back into the bundle structure
+          const loadedBundles = billData.items.map((item, idx) => ({
+            localId: `old-${idx}`,
+            productId: item.product_id,
+            starterType: item.product_name.split(" ")[0], // Assuming naming convention "Type Rating kW"
+            ratingKw: item.product_name.split(" ")[1],
+            components: [
+              {
+                name: item.product_name,
+                brand_name: "",
+                model: "",
+                quantity: item.quantity,
+                base_price: item.unit_price,
+                unit_price: item.unit_price,
+                discount_percent: 0,
+              },
+            ],
+            subtotal: item.line_total,
+            totalAfterDiscount: item.line_total,
+          }));
+
+          setBillBundles(loadedBundles);
+          // Calculate the original discount % if possible
+          const discPercent =
+            (billData.discount_amount / billData.subtotal_amount) * 100;
+          setBillDiscountPercent(Math.round(discPercent) || 0);
+        }
+      } catch (err) {
+        console.error("Fetch Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [navigate, token, role, authHeaders]);
+
+  /* ---------------- HANDLERS ---------------- */
 
   const handleAddBundle = () => {
     const prod = allBundles.find(
@@ -63,7 +124,6 @@ const AddBill = () => {
         p.starter_type === starterFilter &&
         Number(p.rating_kw) === Number(ratingFilter)
     );
-
     if (!prod) return alert("Bundle not found");
 
     const components = prod.components.map((c) => ({
@@ -71,7 +131,9 @@ const AddBill = () => {
       brand_name: c.brand_name,
       model: c.model || "",
       quantity: Math.max(1, Number(c.quantity)),
+      base_price: Number(c.unit_price),
       unit_price: Number(c.unit_price),
+      discount_percent: 0,
     }));
 
     setBillBundles((prev) => [
@@ -82,244 +144,427 @@ const AddBill = () => {
         starterType: prod.starter_type,
         ratingKw: prod.rating_kw,
         components,
-        expanded: true,
         totalAfterDiscount: 0,
       }),
     ]);
   };
 
-  /* ---------------- GENERATE BILL ---------------- */
+  const updateQuantity = (bundleId, idx, value) => {
+    // If user clears the input, default to 1 for quantity
+    const numValue = value === "" ? 1 : Math.max(1, parseInt(value));
+    setBillBundles((prev) =>
+      prev.map((b) => {
+        if (b.localId !== bundleId) return b;
+        const components = [...b.components];
+        components[idx].quantity = numValue;
+        return recalcBundle({ ...b, components });
+      })
+    );
+  };
+
+  const updateComponentDiscount = (bundleId, idx, value) => {
+    // If user clears input, default to 0. Otherwise, parse as number to remove leading zero.
+    const numValue =
+      value === "" ? 0 : Math.min(100, Math.max(0, Number(value)));
+    setBillBundles((prev) =>
+      prev.map((b) => {
+        if (b.localId !== bundleId) return b;
+        const components = [...b.components];
+        components[idx].discount_percent = numValue;
+        return recalcBundle({ ...b, components });
+      })
+    );
+  };
+
+  const addComponentToBundle = (bundleId, component) => {
+    setBillBundles((prev) =>
+      prev.map((b) => {
+        if (b.localId !== bundleId) return b;
+        const newComp = {
+          name: component.name,
+          brand_name: component.brand_name,
+          model: component.model || "",
+          quantity: 1,
+          base_price: Number(component.base_unit_price || 0),
+          unit_price: Number(component.base_unit_price || 0),
+          discount_percent: 0,
+        };
+        return recalcBundle({ ...b, components: [...b.components, newComp] });
+      })
+    );
+    setComponentSearch("");
+    setActiveBundleId(null);
+  };
+
+  const removeBundle = (bundleId) =>
+    setBillBundles((prev) => prev.filter((b) => b.localId !== bundleId));
+  const removeComponent = (bundleId, idx) => {
+    setBillBundles((prev) =>
+      prev.map((b) => {
+        if (b.localId !== bundleId) return b;
+        return recalcBundle({
+          ...b,
+          components: b.components.filter((_, i) => i !== idx),
+        });
+      })
+    );
+  };
+
+  const filteredComponents = useMemo(() => {
+    if (componentSearch.length < 3) return [];
+    const query = componentSearch.toLowerCase();
+    return allComponents.filter(
+      (c) =>
+        c.name.toLowerCase().includes(query) ||
+        (c.brand_name && c.brand_name.toLowerCase().includes(query)) ||
+        (c.model && c.model.toLowerCase().includes(query))
+    );
+  }, [componentSearch, allComponents]);
+
   const generateExcel = (billNumber) => {
-    const rows = [];
-    let grandTotal = 0;
-
-    rows.push(["BILL ID:", billNumber]);
-    rows.push([]);
-
+    const rows = [["BILL ID:", billNumber], []];
     billBundles.forEach((bundle) => {
       rows.push([`${bundle.starterType} ${bundle.ratingKw} kW`]);
-      rows.push(["PRODUCT", "MODEL", "BRAND", "QTY", "DISCOUNT", "RATE"]);
-
-      let bundleTotal = 0;
-
+      rows.push(["PRODUCT", "MODEL", "BRAND", "QTY", "RATE (Disc.)", "TOTAL"]);
       bundle.components.forEach((c) => {
-        const lineTotal = c.quantity * c.unit_price;
-        bundleTotal += lineTotal;
-
         rows.push([
           c.name,
           c.model || "",
           c.brand_name,
           c.quantity,
-          0,
           c.unit_price,
+          c.quantity * c.unit_price,
         ]);
       });
-
-      rows.push(["", "", "", "", "TOTAL", bundleTotal]);
-      rows.push([]);
-
-      grandTotal += bundleTotal;
+      rows.push(["", "", "", "", "TOTAL", bundle.subtotal], []);
     });
-
-    rows.push([]);
-    rows.push(["DISCOUNT (%)", billDiscountPercent]);
-    rows.push([
-      "GRAND TOTAL",
-      grandTotal - (grandTotal * billDiscountPercent) / 100,
-    ]);
-
+    rows.push(
+      [],
+      ["SUBTOTAL", billSubtotal],
+      ["BILL DISCOUNT (%)", `${billDiscountPercent}%`],
+      ["GRAND TOTAL", grandTotal]
+    );
     const worksheet = XLSX.utils.aoa_to_sheet(rows);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Bill");
-
-    const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([wbout], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    const url = URL.createObjectURL(blob);
-    window.open(url);
+    XLSX.writeFile(workbook, `Bill_${billNumber}.xlsx`);
   };
 
-  /* ---------------- CREATE BILL + EXCEL ---------------- */
   const handleCreateBill = async () => {
+    if (billBundles.length === 0) return;
     try {
-      // 1️⃣ Save bill in DB
       const items = billBundles.map((b) => ({
         product_id: b.productId,
         quantity: 1,
         override_price: b.totalAfterDiscount,
       }));
-
       const res = await axios.post(
         `${API_URL}/billing`,
-        {
-          items,
-          discount_amount: billDiscountAmount,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { items, discount_amount: billDiscountAmount },
+        { headers: authHeaders }
       );
-
-      const billNumber = res.data.bill_number;
-
-      // 2️⃣ Generate Excel in new tab
-      generateExcel(billNumber);
-
-      // 3️⃣ Redirect to View Bills
+      generateExcel(res.data.bill_number);
       navigate("/view-bills");
     } catch (err) {
-      console.error(err);
       alert("Failed to generate order");
     }
   };
 
-  /* ---------------- COMPONENT EDIT ---------------- */
-
-  const updateQuantity = (bundleId, idx, value) => {
-    setBillBundles((prev) =>
-      prev.map((b) => {
-        if (b.localId !== bundleId) return b;
-
-        const components = [...b.components];
-        components[idx].quantity = Math.max(1, Number(value || 1));
-
-        return recalcBundle({ ...b, components });
-      })
-    );
-  };
-
-  const removeComponent = (bundleId, idx) => {
-    setBillBundles((prev) =>
-      prev.map((b) => {
-        if (b.localId !== bundleId) return b;
-
-        const components = b.components.filter((_, i) => i !== idx);
-        return recalcBundle({ ...b, components });
-      })
-    );
-  };
-
   if (loading)
     return (
-      <div className="flex items-center text-center justify-center p-8 text-white">
-        Loading...
+      <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] text-white">
+        <div className="animate-pulse">Initializing Data...</div>
       </div>
     );
 
-  /* ================= UI ================= */
-
   return (
-    <div className="p-8 text-white">
-      <h1 className="text-2xl font-bold mb-4">New Bill</h1>
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans pb-20">
+      <div className="max-w-5xl mx-auto p-6 md:p-10">
+        <h1 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
+          {editBillId ? "View Bill Details" : "Create New Bill"}
+        </h1>
 
-      {/* ADD BUNDLE */}
-      <div className="bg-gray-900 p-4 rounded mb-4 grid grid-cols-3 gap-3">
-        <select
-          value={starterFilter}
-          onChange={(e) => {
-            setStarterFilter(e.target.value);
-            setRatingFilter("");
-          }}
-          className="bg-gray-800 p-2 rounded"
-        >
-          <option value="">Starter Type</option>
-          <option>DOL</option>
-          <option>RDOL</option>
-          <option>S/D</option>
-        </select>
-
-        <select
-          value={ratingFilter}
-          onChange={(e) => setRatingFilter(e.target.value)}
-          className="bg-gray-800 p-2 rounded"
-        >
-          <option value="">Rating</option>
-          {allBundles
-            .filter((b) => b.starter_type === starterFilter)
-            .map((b) => (
-              <option key={b.id} value={b.rating_kw}>
-                {b.rating_kw} kW
-              </option>
-            ))}
-        </select>
-
-        <button
-          onClick={handleAddBundle}
-          className="bg-green-600 px-4 py-2 rounded"
-        >
-          Add Bundle
-        </button>
-      </div>
-
-      {/* BUNDLE DISPLAY */}
-      {billBundles.map((b) => (
-        <div key={b.localId} className="bg-gray-900 p-4 rounded mb-4">
-          <div className="font-semibold mb-2">
-            {b.starterType} — {b.ratingKw} kW
-          </div>
-
-          {b.components.map((c, idx) => (
-            <div
-              key={idx}
-              className="flex items-center justify-between bg-gray-800 p-2 rounded mb-1 text-sm"
-            >
-              <span>
-                {c.name} | {c.brand_name} | ₹{c.unit_price}
-              </span>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={1}
-                  value={c.quantity}
-                  onChange={(e) =>
-                    updateQuantity(b.localId, idx, e.target.value)
-                  }
-                  className="w-16 bg-gray-900 p-1 rounded"
-                />
-
-                <button
-                  onClick={() => removeComponent(b.localId, idx)}
-                  className="text-red-400"
+        {/* Hide Add Bundle section if just viewing */}
+        {!editBillId && (
+          <div className="bg-[#1a1a1a] border border-white/10 p-6 rounded-2xl mb-8 shadow-2xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-gray-500 ml-1">
+                  Starter Type
+                </label>
+                <select
+                  value={starterFilter}
+                  onChange={(e) => {
+                    setStarterFilter(e.target.value);
+                    setRatingFilter("");
+                  }}
+                  className="bg-black/40 border border-white/10 p-3 rounded-xl focus:border-green-500 outline-none transition-colors"
                 >
-                  Remove
+                  <option value="">Select Type</option>
+                  <option>DOL</option>
+                  <option>RDOL</option>
+                  <option>S/D</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-gray-500 ml-1">Rating</label>
+                <select
+                  value={ratingFilter}
+                  onChange={(e) => setRatingFilter(e.target.value)}
+                  className="bg-black/40 border border-white/10 p-3 rounded-xl focus:border-green-500 outline-none transition-colors"
+                >
+                  <option value="">Select Rating</option>
+                  {allBundles
+                    .filter((b) => b.starter_type === starterFilter)
+                    .map((b) => (
+                      <option key={b.id} value={b.rating_kw}>
+                        {b.rating_kw} kW
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div className="flex items-end">
+                <button
+                  onClick={handleAddBundle}
+                  className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95"
+                >
+                  Add Bundle
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* BUNDLE LIST */}
+        <div className="space-y-6">
+          {billBundles.map((b) => (
+            <div
+              key={b.localId}
+              className="bg-[#1a1a1a] border border-white/10 rounded-2xl overflow-hidden shadow-xl"
+            >
+              <div className="bg-white/5 p-4 flex justify-between items-center border-b border-white/5">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-lg text-green-400">
+                    {b.starterType} — {b.ratingKw} kW
+                  </span>
+                  {!editBillId && (
+                    <button
+                      onClick={() => removeBundle(b.localId)}
+                      className="text-gray-500 hover:text-red-500 transition-colors p-1"
+                    >
+                      🗑️
+                    </button>
+                  )}
+                </div>
+                <span className="text-sm font-mono text-gray-400">
+                  Bundle Subtotal: ₹{b.subtotal.toFixed(2)}
+                </span>
+              </div>
+
+              <div className="p-4 space-y-3">
+                {b.components.map((c, idx) => (
+                  <div
+                    key={idx}
+                    className="flex flex-wrap items-center justify-between bg-black/20 p-4 rounded-xl border border-white/5 hover:border-white/20 transition-all"
+                  >
+                    <div className="flex-1 min-w-[180px]">
+                      <p className="font-medium">{c.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {c.brand_name} {c.model ? `| ${c.model}` : ""}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-4 mt-2 md:mt-0">
+                      <div className="text-right">
+                        <p className="text-[10px] text-gray-500 uppercase">
+                          Rate
+                        </p>
+                        <p className="font-mono text-sm">
+                          ₹{Number(c.unit_price || 0).toFixed(2)}
+                        </p>
+                        {c.discount_percent > 0 && (
+                          <p className="text-[9px] text-green-500 line-through">
+                            ₹{c.base_price}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] text-gray-500 uppercase">
+                          Qty
+                        </label>
+                        <input
+                          type="number"
+                          disabled={!!editBillId}
+                          value={c.quantity}
+                          onChange={(e) =>
+                            updateQuantity(b.localId, idx, e.target.value)
+                          }
+                          className="w-14 bg-black/40 border border-white/10 p-1 rounded-lg text-center outline-none focus:border-green-500 text-sm disabled:opacity-50"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] text-gray-500 uppercase">
+                          Disc%
+                        </label>
+                        <input
+                          type="number"
+                          disabled={!!editBillId}
+                          value={c.discount_percent}
+                          onChange={(e) =>
+                            updateComponentDiscount(
+                              b.localId,
+                              idx,
+                              e.target.value
+                            )
+                          }
+                          className="w-14 bg-black/40 border border-green-900/30 p-1 rounded-lg text-center outline-none focus:border-green-500 text-sm text-green-400 disabled:opacity-50"
+                        />
+                      </div>
+
+                      {!editBillId && (
+                        <button
+                          onClick={() => removeComponent(b.localId, idx)}
+                          className="text-red-500 hover:text-red-400 p-2 hover:bg-red-500/10 rounded-full transition-all"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Hide Extra Component button if just viewing */}
+                {!editBillId && (
+                  <div className="mt-4 border-t border-white/5 pt-4">
+                    {activeBundleId === b.localId ? (
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Search..."
+                            className="flex-1 bg-black/60 border border-white/10 p-2 rounded-lg outline-none text-sm"
+                            value={componentSearch}
+                            onChange={(e) => setComponentSearch(e.target.value)}
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => {
+                              setActiveBundleId(null);
+                              setComponentSearch("");
+                            }}
+                            className="text-xs text-gray-500 px-2"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                        {filteredComponents.length > 0 && (
+                          <div className="max-h-40 overflow-y-auto bg-black/80 rounded-lg border border-white/10 shadow-2xl">
+                            {filteredComponents.map((comp) => (
+                              <div
+                                key={comp.id}
+                                className="p-3 border-b border-white/5 hover:bg-green-600/20 cursor-pointer flex justify-between items-center"
+                                onClick={() =>
+                                  addComponentToBundle(b.localId, comp)
+                                }
+                              >
+                                <div>
+                                  <p className="text-sm font-bold">
+                                    {comp.name}
+                                  </p>
+                                </div>
+                                <p className="text-green-400 font-mono text-xs">
+                                  ₹{comp.base_unit_price}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setActiveBundleId(b.localId)}
+                        className="text-xs font-bold text-green-500 hover:text-green-400 transition-colors"
+                      >
+                        + ADD EXTRA COMPONENT
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ))}
         </div>
-      ))}
 
-      {/* DISCOUNT */}
-      {billBundles.length > 0 && (
-        <>
-          <div className="bg-gray-900 p-4 rounded mt-4 flex gap-4 items-center">
-            <label>Bill Discount (%)</label>
-            <input
-              type="number"
-              min={0}
-              value={billDiscountPercent}
-              onChange={(e) =>
-                setBillDiscountPercent(Math.max(0, Number(e.target.value)))
-              }
-              className="bg-gray-800 p-2 rounded w-32"
-            />
+        {/* TOTALS */}
+        {billBundles.length > 0 && (
+          <div className="mt-10 border-t border-white/10 pt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+              <div className="bg-[#1a1a1a] p-6 rounded-2xl border border-white/10">
+                <h4 className="text-sm font-bold text-gray-500 mb-4 uppercase">
+                  Overall Adjustments
+                </h4>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm text-gray-400">
+                    Total Bill Discount (%)
+                  </label>
+                  <input
+                    type="number"
+                    disabled={!!editBillId}
+                    value={billDiscountPercent}
+                    onChange={(e) =>
+                      setBillDiscountPercent(
+                        e.target.value === ""
+                          ? ""
+                          : Math.min(100, Math.max(0, Number(e.target.value)))
+                      )
+                    }
+                    className="bg-black/40 border border-white/10 p-3 rounded-xl outline-none focus:border-green-500 transition-all disabled:opacity-50"
+                  />
+                </div>
+              </div>
+              <div className="bg-green-600/10 border border-green-500/20 p-6 rounded-2xl">
+                <div className="space-y-3">
+                  <div className="flex justify-between text-gray-400">
+                    <span>Subtotal:</span>
+                    <span className="font-mono font-bold">
+                      ₹{billSubtotal.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-red-400">
+                    <span>Bill Discount:</span>
+                    <span className="font-mono">
+                      - ₹{billDiscountAmount.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-end border-t border-white/10 pt-4 mt-2">
+                    <span className="text-lg font-bold">Grand Total:</span>
+                    <span className="text-3xl font-black text-green-400 font-mono">
+                      ₹{grandTotal.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+                {!editBillId ? (
+                  <button
+                    onClick={handleCreateBill}
+                    className="w-full mt-6 bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl shadow-xl transition-all active:scale-95 uppercase tracking-widest"
+                  >
+                    Generate Order
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate("/view-bills")}
+                    className="w-full mt-6 bg-gray-700 hover:bg-gray-600 text-white font-black py-4 rounded-xl shadow-xl transition-all uppercase tracking-widest"
+                  >
+                    Back to History
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
-
-          <div className="mt-4 bg-gray-800 p-4 rounded">
-            <p>Subtotal: ₹{billSubtotal.toFixed(2)}</p>
-            <p>Discount: ₹{billDiscountAmount.toFixed(2)}</p>
-            <p className="font-bold">Total: ₹{grandTotal.toFixed(2)}</p>
-          </div>
-          <button
-            onClick={handleCreateBill}
-            className="mt-4 bg-green-600 px-4 py-2 rounded"
-          >
-            Generate Order
-          </button>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 };

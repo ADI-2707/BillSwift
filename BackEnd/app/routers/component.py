@@ -4,10 +4,24 @@ from decimal import Decimal
 
 from app.db.session import get_db
 from app.models.component import Component
-from app.auth.jwt_handler import require_admin
+from app.auth.jwt_handler import require_admin, get_current_user
 from app.models.user import User
 # Import the schemas we fixed earlier
 from app.schemas.component import ComponentOut, ComponentCreate, ComponentUpdate
+
+# --- USER ROUTER (New) ---
+router = APIRouter(
+    prefix="/components",
+    tags=["Components"]
+)
+
+@router.get("/", response_model=list[ComponentOut])
+def list_components_user(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user), # Allow both users and admins
+):
+    """Allows authenticated users to list components for billing."""
+    return db.query(Component).filter(Component.is_active == True).order_by(Component.name).all()
 
 # ADMIN ROUTER
 admin_router = APIRouter(

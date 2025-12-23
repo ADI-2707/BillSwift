@@ -7,7 +7,7 @@ from app.models.product import Product
 from app.models.product_component import ProductComponent
 from app.models.component import Component
 from app.schemas.product import ProductCreate, ProductOut, ProductComponentOut
-from app.auth.jwt_handler import require_admin
+from app.auth.jwt_handler import require_admin, get_current_user
 from app.models.user import User
 
 router = APIRouter(prefix="/products", tags=["Products"])
@@ -87,7 +87,7 @@ def create_product_bundle(
 @router.get("/", response_model=list[ProductOut])
 def list_products(
     db: Session = Depends(get_db),
-    _: User = Depends(require_admin),
+    _: User = Depends(get_current_user),
 ):
     products = db.query(Product).all()
     return [serialize_product(p) for p in products]

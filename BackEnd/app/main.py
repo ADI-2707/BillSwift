@@ -14,7 +14,7 @@ from app.routers.product import router as product_router
 from app.routers.bill import router as bill_router
 from app.routers.user_admin import router as admin_user_router
 from app.routers.admin_bill import router as admin_bill_router
-from app.routers.component import admin_router
+from app.routers.component import admin_router, router as component_router
 
 
 # CREATE DEFAULT ADMIN
@@ -80,6 +80,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_bill_router)
 
     # COMPONENT ROUTERS (THIS FIXES YOUR ISSUE)
+    app.include_router(component_router)
     app.include_router(admin_router)   # /admin/components
 
     # HEALTH

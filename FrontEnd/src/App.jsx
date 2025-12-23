@@ -68,7 +68,7 @@ const App = () => {
           }
         />
         <Route path='/unauthorized' element={<Unauthorized />} />
-        <Route path="/admin/components" element={<ComponentsAdmin />} />
+        <Route path="/admin/components" element={<ProtectedRoute requiredRole="admin"><ComponentsAdmin /></ProtectedRoute>} />
 
       </Routes>
       <Footer />
