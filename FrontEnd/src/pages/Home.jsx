@@ -87,7 +87,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]/80 text-white font-sans pb-20 border-2 border-white/20 rounded-lg">
+    <div className="min-h-screen bg-[#0a0a0a]/40 text-white font-sans pb-20  rounded-lg mt-20">
       {/* MAIN BANNER */}
       <div className="text-center pt-20 mb-12 px-4">
         <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tight bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
