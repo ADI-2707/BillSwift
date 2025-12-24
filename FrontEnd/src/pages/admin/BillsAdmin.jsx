@@ -13,8 +13,10 @@ const BillsAdmin = () => {
   const role = localStorage.getItem("role");
 
   const [bills, setBills] = useState([]);
-  const [filteredBills, setFilteredBills] = useState([]); // State for filtered results
-  const [emailSearch, setEmailSearch] = useState(""); // State for search input
+  const [filteredBills, setFilteredBills] = useState([]);
+  const [emailSearch, setEmailSearch] = useState("");
+  // New state for debounced value
+  const [debouncedSearch, setDebouncedSearch] = useState(""); 
   const [error, setError] = useState("");
 
   const getAllBills = async () => {
@@ -24,7 +26,7 @@ const BillsAdmin = () => {
       });
       const data = res.data || [];
       setBills(data);
-      setFilteredBills(data); // Initialize filtered bills with all data
+      setFilteredBills(data);
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to load bills!");
     }
@@ -42,14 +44,25 @@ const BillsAdmin = () => {
     getAllBills();
   }, []);
 
-  // Filter bills whenever search input changes
+  // Logic for Debouncing the search input
   useEffect(() => {
-    const lowerCaseSearch = emailSearch.toLowerCase();
+    const handler = setTimeout(() => {
+      setDebouncedSearch(emailSearch);
+    }, 300); // 300ms delay
+
+    return () => {
+      clearTimeout(handler); // Cleanup if user types again within 300ms
+    };
+  }, [emailSearch]);
+
+  // Filter bills whenever debounced search value changes
+  useEffect(() => {
+    const lowerCaseSearch = debouncedSearch.toLowerCase();
     const filtered = bills.filter((bill) =>
       (bill.user_email || "").toLowerCase().includes(lowerCaseSearch)
     );
     setFilteredBills(filtered);
-  }, [emailSearch, bills]);
+  }, [debouncedSearch, bills]);
 
   const deleteBill = async (billId) => {
     if (!window.confirm("Are you sure you want to permanently delete this bill?")) return;
@@ -80,7 +93,6 @@ const BillsAdmin = () => {
                 <p className="text-gray-400 text-sm mt-1">Review and manage all system transactions</p>
               </div>
 
-              {/* Email Search Filter */}
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
@@ -152,10 +164,10 @@ const BillsAdmin = () => {
                             {parseFloat(bill.total_amount).toLocaleString('en-IN')}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="px-6 py-4 text-center text-gray-500">
                           <button
                             onClick={() => deleteBill(bill.id)}
-                            className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                            className="p-2 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                             title="Delete Bill"
                           >
                             <Trash2 className="w-5 h-5" />
