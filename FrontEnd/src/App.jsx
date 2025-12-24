@@ -26,7 +26,14 @@ const App = () => {
         <Route path="/view-bills" element={<ProtectedRoute><ViewBills /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute >} />
+        <Route 
+          path="/account" 
+          element={
+            <ProtectedRoute>
+              <Account />
+            </ProtectedRoute >
+          }
+           />
         <Route
           path="/admin"
           element={

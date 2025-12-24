@@ -135,7 +135,7 @@ const Account = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               type="text"
-              placeholder="Search Bill ID..."
+              placeholder="Search Order ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-[#111] border border-slate-800 rounded-lg py-2 pl-10 pr-4 text-sm focus:border-emerald-500 outline-none transition-all"
@@ -187,7 +187,7 @@ const Account = () => {
               <thead>
                 <tr className="bg-slate-900/50 border-b border-slate-800">
                   <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Bill ID
+                    Order ID
                   </th>
                   <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Date Issued

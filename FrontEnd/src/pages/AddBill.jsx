@@ -296,7 +296,7 @@ const AddBill = () => {
                 </select>
               </div>
               <div className="flex items-end">
-                <button onClick={handleAddBundle} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95">Add Bundle</button>
+                <button onClick={handleAddBundle} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95">Add Starter Type</button>
               </div>
             </div>
           </div>
@@ -312,13 +312,13 @@ const AddBill = () => {
                     <span className={`transition-transform duration-200 text-green-500 text-xs ${isExpanded ? "rotate-90" : "rotate-0"}`}>▶</span>
                     <span className="font-bold text-lg text-green-400">{b.starterType} — {b.ratingKw} kW</span>
                     {!editBillId && (
-                     <div className='h-8 w-8 rounded-full bg-red-200/20 hover:bg-red-500 z-1 transition-all active:scale-95'> 
+                     <div className='h-8 w-8 rounded-full border-2 border-white/20 hover:bg-red-700 z-1 transition-all active:scale-95'> 
                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           removeBundle(b.localId);
                         }}
-                        className="cursor-pointer z-2 pl-1 mt-1 hover:scale-105 transition-all"
+                        className="cursor-pointer z-2 pl-0.5 mt-0.5 hover:scale-105 transition-all"
                       >
                         🗑️
                       </button>
@@ -382,7 +382,7 @@ const AddBill = () => {
                             )}
                           </div>
                         ) : (
-                          <button onClick={() => setActiveBundleId(b.localId)} className="text-xs font-bold text-green-500 hover:text-green-400 transition-colors">+ ADD EXTRA COMPONENT</button>
+                          <button onClick={() => setActiveBundleId(b.localId)} className="text-xs font-bold text-green-500 hover:text-green-400 cursor-pointer border border-white/1 transition-colors hover:border-green-600 hover:border px-2 py-2 rounded active:bg-green-500 active:text-white">+ ADD EXTRA COMPONENT</button>
                         )}
                       </div>
                     )}
@@ -399,7 +399,7 @@ const AddBill = () => {
               <div className="bg-[#1a1a1a] p-6 rounded-2xl border border-white/10">
                 <h4 className="text-sm font-bold text-gray-500 mb-4 uppercase">Overall Adjustments</h4>
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm text-gray-400">Total Bill Discount (%)</label>
+                  <label className="text-sm text-gray-400">Total Order Discount (%)</label>
                   <input type="number" disabled={!!editBillId} value={billDiscountPercent} onChange={(e) => setBillDiscountPercent(e.target.value === "" ? "" : Math.min(100, Math.max(0, Number(e.target.value))))} className="bg-black/40 border border-white/10 p-3 rounded-xl outline-none focus:border-green-500 transition-all disabled:opacity-50" />
                 </div>
               </div>

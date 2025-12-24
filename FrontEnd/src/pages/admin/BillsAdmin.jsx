@@ -88,7 +88,7 @@ const BillsAdmin = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
               <div>
                 <h1 className="text-3xl font-bold bg-linear-to-r from-white to-gray-500 bg-clip-text text-transparent">
-                  Bill Management
+                  Order Management
                 </h1>
                 <p className="text-gray-400 text-sm mt-1">Review and manage all system transactions</p>
               </div>
@@ -106,7 +106,7 @@ const BillsAdmin = () => {
                 </div>
                 <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-lg">
                   <span className="text-emerald-500 font-mono font-bold">{filteredBills.length}</span>
-                  <span className="text-gray-400 text-xs ml-2 uppercase tracking-widest">Bills</span>
+                  <span className="text-gray-400 text-xs ml-2 uppercase tracking-widest">Orders</span>
                 </div>
               </div>
             </div>
@@ -121,7 +121,7 @@ const BillsAdmin = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-white/5 border-b border-white/10">
-                    <th className="px-6 py-4 text-xs font-bold uppercase text-gray-400 tracking-wider">Bill Details</th>
+                    <th className="px-6 py-4 text-xs font-bold uppercase text-gray-400 tracking-wider">Order Details</th>
                     <th className="px-6 py-4 text-xs font-bold uppercase text-gray-400 tracking-wider">User Info</th>
                     <th className="px-6 py-4 text-xs font-bold uppercase text-gray-400 tracking-wider">Date</th>
                     <th className="px-6 py-4 text-xs font-bold uppercase text-gray-400 tracking-wider">Amount</th>

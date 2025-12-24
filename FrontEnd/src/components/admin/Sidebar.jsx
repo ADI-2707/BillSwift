@@ -35,7 +35,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             { to: "/admin/pending-users", icon: <FiUsers />, label: "Pending Approvals" },
             { to: "/admin/components", icon: <FiLayers />, label: "Components" },
             { to: "/admin/products", icon: <FiBox />, label: "Products" },
-            { to: "/admin/bills", icon: <FiFileText />, label: "Bills" },
+            { to: "/admin/bills", icon: <FiFileText />, label: "Orders" },
             { to: "/admin/settings", icon: <FiSettings />, label: "Settings" },
           ].map((item) => (
             <NavLink
