@@ -47,6 +47,11 @@ const Account = () => {
     fetchAccountData();
   }, []);
 
+  // Function to navigate to bill details
+  const openBill = (billId) => {
+    navigate("/add-bill", { state: { billId } });
+  };
+
   if (!user) {
     return (
       <div className="text-center text-white mt-20">
@@ -114,7 +119,8 @@ const Account = () => {
                 {bills.map((b) => (
                   <tr
                     key={b.id}
-                    className="hover:bg-white/[0.02] transition-colors group"
+                    onClick={() => openBill(b.id)}
+                    className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
                   >
                     <td className="px-6 py-4 font-mono text-sm text-slate-300 group-hover:text-emerald-400 transition-colors">
                       #{b.bill_number}
