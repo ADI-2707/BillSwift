@@ -323,7 +323,7 @@ const AddBill = () => {
                       </button>
                     )}
                   </div>
-                  <span className="text-sm font-mono text-gray-400">Bundle Subtotal: ₹{b.subtotal.toFixed(2)}</span>
+                  <span className="text-sm font-mono text-gray-400">Subtotal: ₹{b.subtotal.toFixed(2)}</span>
                 </div>
 
                 {isExpanded && (
