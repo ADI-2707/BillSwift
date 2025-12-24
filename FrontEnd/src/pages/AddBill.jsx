@@ -270,10 +270,10 @@ const AddBill = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]/80 mt-20 text-white font-sans pb-20 border-2 border-white/20 rounded-lg">
+    <div className="min-h-screen mt-20 text-white font-sans pb-20 rounded-lg">
       <div className="max-w-5xl mx-auto p-6 md:p-10">
         <h1 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
-          {editBillId ? "View Bill Details" : "Create New Bill"}
+          {editBillId ? "View Order Details" : "Create New Order"}
         </h1>
 
         {!editBillId && (
@@ -312,15 +312,17 @@ const AddBill = () => {
                     <span className={`transition-transform duration-200 text-green-500 text-xs ${isExpanded ? "rotate-90" : "rotate-0"}`}>▶</span>
                     <span className="font-bold text-lg text-green-400">{b.starterType} — {b.ratingKw} kW</span>
                     {!editBillId && (
-                      <button
+                     <div className='h-8 w-8 rounded-full bg-red-200/20 hover:bg-red-500 z-1 transition-all active:scale-95'> 
+                     <button
                         onClick={(e) => {
                           e.stopPropagation();
                           removeBundle(b.localId);
                         }}
-                        className="text-gray-500 hover:text-red-500 transition-colors p-1"
+                        className="cursor-pointer z-2 pl-1 mt-1 hover:scale-105 transition-all"
                       >
                         🗑️
                       </button>
+                      </div>
                     )}
                   </div>
                   <span className="text-sm font-mono text-gray-400">Subtotal: ₹{b.subtotal.toFixed(2)}</span>

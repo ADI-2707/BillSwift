@@ -103,7 +103,7 @@ const ComponentsAdmin = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-black/60 text-white border-white/20">
+    <div className="flex min-h-screen bg-[#0a0a0a]/80 text-white border-white/20 border-2 rounded-lg mt-10 overflow-y-auto">
       {/* Sidebar - Handles its own mobile visibility via props */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 

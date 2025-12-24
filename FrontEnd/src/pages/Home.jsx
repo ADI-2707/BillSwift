@@ -87,7 +87,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]/40 text-white font-sans pb-20  rounded-lg mt-20">
+    <div className="min-h-screen bg-transparent text-white font-sans pb-20  rounded-lg mt-20">
       {/* MAIN BANNER */}
       <div className="text-center pt-20 mb-12 px-4">
         <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tight bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
@@ -97,7 +97,7 @@ const Home = () => {
           </span>
         </h2>
         <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
-          Track orders, generate bills, and stay organized with a powerful yet
+          Track and generate orders, and stay organized with a powerful yet
           simple tool designed for engineering & industrial teams.
         </p>
       </div>
@@ -109,7 +109,7 @@ const Home = () => {
 
         {/* LEFT BOX: ORDERS & SEARCH */}
         <div className="flex justify-center">
-          <div className="flex flex-col bg-[#1a1a1a] border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl backdrop-blur-sm">
+          <div className="flex flex-col bg-[#0a0a0a]/80 border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl backdrop-blur-sm">
             {token ? (
               <>
                 <h1 className="text-xl font-black tracking-widest text-center mb-6">
@@ -201,7 +201,7 @@ const Home = () => {
 
         {/* RIGHT BOX: LOGIN */}
         <div className="flex justify-center">
-          <div className="flex flex-col bg-[#1a1a1a] border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl backdrop-blur-sm">
+          <div className="flex flex-col bg-[#0a0a0a]/80 border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl backdrop-blur-sm">
             {!token ? (
               <>
                 <h1 className="text-xl font-black tracking-widest text-center mb-6">

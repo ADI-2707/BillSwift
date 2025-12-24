@@ -60,7 +60,7 @@ const PendingUsers = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-black/50 text-white border-2 border-white/20 rounded-lg mt-10">
+    <div className="flex min-h-screen bg-[#0a0a0a]/80 text-white border-2 border-white/20 rounded-lg mt-10 overflow-y-auto">
       <Sidebar />
 
       <div className="flex-1 flex flex-col">

@@ -9,13 +9,27 @@ const Navbar = () => {
   // Backend Auth
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
-  const userEmail = localStorage.getItem("email");
+  const userEmail = localStorage.getItem("userEmail");
+  const userName = localStorage.getItem("userName");
 
   const isLoggedIn = () => !!token;
+
+  const getInitials = () => {
+    if (!userName || userName.includes("@")) {
+      return userEmail ? userEmail.charAt(0).toUpperCase(): "U";
+    };
+    const parts = userName.trim().split(" ");
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("userName");
     navigate("/login");
   };
 
@@ -45,11 +59,11 @@ const Navbar = () => {
           </NavLink>
 
           <button onClick={goToAddBill} className="nav_link cursor-pointer">
-            <span className="text-green-600">A</span>dd Bill
+            <span className="text-green-600">A</span>dd Order
           </button>
 
           <button onClick={goToViewBills} className="nav_link cursor-pointer">
-            <span className="text-green-600">V</span>iew Bills
+            <span className="text-green-600">V</span>iew Orders
           </button>
         </div>
 
@@ -122,7 +136,7 @@ const Navbar = () => {
                   onClick={() => { setOpen(false); navigate("/account"); }}
                   className="h-10 w-10 flex items-center justify-center rounded-full bg-green-600 text-white font-bold"
                 >
-                  U
+                  {getInitials( )}
                 </button>
               </>
             ) : (

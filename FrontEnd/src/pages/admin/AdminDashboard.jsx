@@ -35,7 +35,7 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-black/50 text-white border-2 border-white/20 rounded-lg overflow-y-auto mt-10">
+    <div className="flex min-h-screen bg-[#0a0a0a]/80 text-white border-2 border-white/20 rounded-lg overflow-y-auto mt-10">
       <Sidebar />
 
       <div className="flex-1 flex flex-col">

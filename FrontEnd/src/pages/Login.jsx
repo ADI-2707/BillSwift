@@ -36,6 +36,9 @@ const Login = () => {
       localStorage.setItem("role",res.data.role);
       localStorage.setItem("userEmail", res.data.email);
 
+      const displayName = res.data.name || res.data.first_name ? `${res.data.first_name} ${res.data.last_name}` : res.data.email;
+      localStorage.setItem("userName", displayName);
+
       // Navigate admin → admin panel, others → bill page
       if (res.data.role === "admin") {
         navigate("/admin");

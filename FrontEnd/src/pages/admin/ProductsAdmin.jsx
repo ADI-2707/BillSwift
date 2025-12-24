@@ -138,13 +138,13 @@ const ProductsAdmin = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-[#0a0a0a] text-white">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#0a0a0a]/80 text-white border-2 border-white/20 rounded-lg mt-10 overflow-y-auto">
       {/* Sidebar - Hidden on mobile unless toggled */}
-      <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block fixed md:relative z-50 w-64 h-full`}>
+      <div className={`${isSidebarOpen ? 'block' : 'hidden'} md:block fixed md:relative z-50 w-64 h-screen`}>
          <Sidebar onClose={() => setIsSidebarOpen(false)} />
       </div>
 
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         <AdminNavbar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         <main className="p-4 md:p-8">

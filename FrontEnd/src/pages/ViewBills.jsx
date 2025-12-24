@@ -56,10 +56,10 @@ const ViewBills = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]/80 text-white font-sans pb-20 border-2 border-white/20 rounded-lg mt-20">
+    <div className="min-h-screen text-white font-sans pb-20 mt-20">
       <div className="max-w-5xl mx-auto p-6 md:p-10">
         <h1 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
-          Your Bills
+          Your Orders
         </h1>
 
         {error && (
@@ -70,12 +70,12 @@ const ViewBills = () => {
 
         {data.length === 0 && !error ? (
           <div className="text-center py-20 bg-[#1a1a1a] rounded-3xl border border-white/5 shadow-xl mt-10">
-            <p className="text-gray-500 text-lg">No bills found in your history.</p>
+            <p className="text-gray-500 text-lg">No orders found in your history.</p>
             <button 
               onClick={() => navigate("/add-bill")}
               className="mt-4 text-green-500 hover:text-green-400 font-bold transition-all"
             >
-              + Create your first bill
+              + Create your first order
             </button>
           </div>
         ) : (
@@ -86,11 +86,11 @@ const ViewBills = () => {
                 className="group bg-[#1a1a1a] border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:border-green-500/30 transition-all duration-300"
               >
                 {/* Card Header */}
-                <div className="bg-white/5 p-4 border-b border-white/5 flex justify-between items-center">
-                  <span className="font-mono text-xs text-gray-400 tracking-wider">
+                <div className="bg-white/5 p-4 border-b border-white/5 flex justify-between items-center cursor-pointer">
+                  <span className="font-mono text-xs text-gray-400 tracking-wider hover:text-green-500">
                     {bill.bill_number}
                   </span>
-                  <span className="text-[10px] uppercase font-bold text-gray-500 bg-black/40 px-2 py-1 rounded">
+                  <span className="text-[10px] uppercase font-bold text-gray-500 bg-black/40 px-2 py-1 rounded hover:text-white/90 transition-all">
                     {bill.created_at
                       ? new Date(bill.created_at).toLocaleDateString("en-IN", {
                           day: "numeric",
@@ -116,14 +116,14 @@ const ViewBills = () => {
                   <div className="flex gap-3 mt-4">
                     <button
                       onClick={() => openBill(bill.id)}
-                      className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded-xl transition-all shadow-lg active:scale-95 text-sm"
+                      className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded-xl transition-all shadow-lg active:scale-95 text-sm cursor-pointer"
                     >
-                      Open Bill
+                      Open Order
                     </button>
 
                     <button
                       onClick={() => deleteBillFromUI(bill.id)}
-                      className="px-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 hover:border-red-500/40 font-bold py-2 rounded-xl transition-all text-sm"
+                      className="px-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 hover:border-red-500/40 font-bold py-2 rounded-xl transition-all text-sm cursor-pointer"
                       title="Hide from list"
                     >
                       Delete

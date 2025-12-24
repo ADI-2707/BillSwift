@@ -78,7 +78,7 @@ const BillsAdmin = () => {
   };
 
   return (
-    <div className="flex h-screen bg-[#0a0a0a] text-white">
+    <div className="flex h-screen bg-[#0a0a0a]/80 text-white border-2 border-white/20 rounded-lg mt-10 overflow-y-auto backdrop-blur-sm">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <AdminNavbar />
@@ -87,7 +87,7 @@ const BillsAdmin = () => {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold bg-linear-to-r from-white to-gray-500 bg-clip-text text-transparent">
                   Bill Management
                 </h1>
                 <p className="text-gray-400 text-sm mt-1">Review and manage all system transactions</p>
@@ -164,10 +164,10 @@ const BillsAdmin = () => {
                             {parseFloat(bill.total_amount).toLocaleString('en-IN')}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center text-gray-500">
+                        <td className="px-6 py-4 text-center text-red-500">
                           <button
                             onClick={() => deleteBill(bill.id)}
-                            className="p-2 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                            className="p-2 hover:text-red-500 hover:bg-red-400/10 rounded-full transition-all cursor-pointer"
                             title="Delete Bill"
                           >
                             <Trash2 className="w-5 h-5" />
