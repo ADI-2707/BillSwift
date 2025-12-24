@@ -73,7 +73,6 @@ const AddBill = () => {
           const billData = billRes.data;
 
           const loadedBundles = billData.items.map((item, idx) => {
-            // MATCH WITH ORIGINAL PRODUCT TO RETRIEVE COMPONENTS
             const originalProduct = products.find(p => p.id === item.product_id);
             
             return {
@@ -81,7 +80,6 @@ const AddBill = () => {
               productId: item.product_id,
               starterType: item.product_name.split(" ")[0],
               ratingKw: item.product_name.split(" ")[1],
-              // Map components from original product data so they can be expanded
               components: originalProduct ? originalProduct.components.map(c => ({
                 name: c.name,
                 brand_name: c.brand_name,
@@ -370,7 +368,11 @@ const AddBill = () => {
                               <div className="max-h-40 overflow-y-auto bg-black/80 rounded-lg border border-white/10 shadow-2xl">
                                 {filteredComponents.map((comp) => (
                                   <div key={comp.id} className="p-3 border-b border-white/5 hover:bg-green-600/20 cursor-pointer flex justify-between items-center" onClick={() => addComponentToBundle(b.localId, comp)}>
-                                    <p className="text-sm font-bold">{comp.name}</p>
+                                    <div>
+                                      <p className="text-sm font-bold">{comp.name}</p>
+                                      {/* Corrected logic to show model in results */}
+                                      <p className="text-xs text-gray-500 italic">{comp.model || "No Model Info"}</p>
+                                    </div>
                                     <p className="text-green-400 font-mono text-xs">₹{comp.base_unit_price}</p>
                                   </div>
                                 ))}
