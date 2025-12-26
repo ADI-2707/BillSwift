@@ -96,7 +96,7 @@ const Account = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-slate-200 pb-20">
       {/* Profile Header Section */}
-      <div className="bg-gradient-to-b from-emerald-900/20 to-transparent pt-16 pb-12">
+      <div className="bg-gradient-to-b from-emerald-900/10 to-transparent pt-16 pb-12">
         <div className="max-w-5xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="h-24 w-24 rounded-full bg-emerald-500 flex items-center justify-center text-3xl font-bold text-black shadow-lg shadow-emerald-500/20">
