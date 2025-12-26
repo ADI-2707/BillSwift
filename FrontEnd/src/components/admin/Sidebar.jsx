@@ -1,10 +1,9 @@
 import { NavLink } from "react-router-dom";
-import { FiUsers, FiBox, FiFileText, FiSettings, FiHome, FiLayers, FiX } from "react-icons/fi";
+import { FiUsers, FiBox, FiFileText, FiSettings, FiHome, FiLayers, FiX, FiUserCheck } from "react-icons/fi";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   return (
     <>
-      {/* Mobile Overlay: Darkens background when sidebar is open */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black/90 z-40 md:hidden transition-all duration-300"
@@ -19,11 +18,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       `}>
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold text-green-400">
-            <span className="text-2xl text-red-600">B</span>
+            <span className="text-2xl text-red-600">B</span>  
             <span className="text-2xl text-white">ill</span>
             <span className="text-2xl text-red-600">Swift</span> Admin
           </h2>
-          {/* Close button for mobile */}
           <button onClick={toggleSidebar} className="md:hidden text-white p-1">
             <FiX size={24} />
           </button>
@@ -32,7 +30,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <nav className="flex flex-col gap-3">
           {[
             { to: "/admin", icon: <FiHome />, label: "Dashboard", end: true },
-            { to: "/admin/pending-users", icon: <FiUsers />, label: "Pending Approvals" },
+            { to: "/admin/pending-users", icon: <FiUserCheck />, label: "Users" }, // Label Updated
             { to: "/admin/components", icon: <FiLayers />, label: "Components" },
             { to: "/admin/products", icon: <FiBox />, label: "Products" },
             { to: "/admin/bills", icon: <FiFileText />, label: "Orders" },

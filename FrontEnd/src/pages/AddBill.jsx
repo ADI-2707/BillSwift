@@ -344,7 +344,7 @@ const AddBill = () => {
                           e.stopPropagation();
                           removeBundle(b.localId);
                         }}
-                        className="text-gray-500 hover:text-red-500 ml-2 cursor-pointer hover:border hover:bg-red-500/15 border  rounded-full border-transparent hover:border-red-500 p-2 transition-all"
+                        className="text-gray-500 hover:text-red-500 ml-2 cursor-pointer hover:border hover:bg-red-500/25 border rounded-full border-transparent hover:border-red-500/50 p-1.5 transition-all"
                       >
                         🗑️
                       </button>

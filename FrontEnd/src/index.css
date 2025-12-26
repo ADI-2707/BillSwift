@@ -189,3 +189,129 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   position: relative;
   padding-left: 3rem !important;
 }
+
+/* Ensure the dashboard container doesn't overflow on small screens */
+@media (max-width: 768px) {
+  .flex-1 {
+    width: 100%;
+  }
+  
+  /* If your Sidebar is fixed, add padding to the top of the content */
+  /* If it's inline, the flex-col in the JS code handles it */
+}
+
+/* Fix for the gradient text (Tailwind v4 uses bg-gradient-to-r, not bg-linear-to-r) */
+.bg-gradient-to-r {
+  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+/* Fix for the table containers to allow horizontal scroll without breaking the layout */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 185, 129, 0.2) transparent;
+}
+
+/* Ensure background gradient text works on all browsers */
+.bg-gradient-to-r {
+  background-image: linear-gradient(to right, var(--tw-gradient-stops, #fff, #6b7280));
+}
+
+/* Custom scrollbar for the table overflow */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.3);
+  border-radius: 10px;
+}
+
+/* Mobile specific padding for the main wrapper */
+@media (max-width: 768px) {
+  .mt-10 {
+    margin-top: 1.5rem; /* Reduce top margin on small screens */
+  }
+}
+
+/* Ensure the main dashboard area has a smooth scroll experience */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* Fix for overlapping dropdowns - ensures they stay above all other elements */
+.z-\[100\] {
+  z-index: 100 !important;
+}
+
+/* Ensure numbers don't show increment arrows for cleaner UI */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Pulse animation for the search loader */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Ensure the horizontal scroll bar for the table looks clean on mobile */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 185, 129, 0.2) transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.2);
+  border-radius: 10px;
+}
+
+/* Fix for background-clip-text on some browsers */
+.bg-clip-text {
+  -webkit-background-clip: text;
+}
+
+/* Smooth custom scrollbar for the main content area */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+/* Shake animation for errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 0.2s ease-in-out 0s 2;
+}
+
+/* Ensure password dots look consistent in the input */
+input[type="password"] {
+  font-family: caption;
+  letter-spacing: 0.2em;
+}
+
+/* Override for placeholder dots spacing */
+input[type="password"]::placeholder {
+  letter-spacing: normal;
+  font-family: inherit;
+}
