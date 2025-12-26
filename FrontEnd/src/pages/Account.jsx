@@ -215,7 +215,7 @@ const Account = () => {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {filteredAndSortedBills.map((b) => (
-                  <tr key={b.id} onClick={() => openBill(b.id)} className="transition-all group cursor-pointer hover:bg-white/[0.02]">
+                  <tr key={b.id} onClick={() => openBill(b.id)} className="transition-all group cursor-pointer">
                     <td className="px-8 py-6">
                       <span className="font-mono text-sm font-bold text-slate-300 group-hover:text-emerald-400 transition-colors">#{b.bill_number}</span>
                     </td>
