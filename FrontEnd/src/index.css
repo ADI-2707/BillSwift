@@ -108,8 +108,6 @@ body {
   background: #444;
 }
 
-/* VIEW BILLS SPECIFIC STYLES */
-
 /* Transitions for the order cards */
 .group {
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -195,9 +193,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .flex-1 {
     width: 100%;
   }
-  
-  /* If your Sidebar is fixed, add padding to the top of the content */
-  /* If it's inline, the flex-col in the JS code handles it */
 }
 
 /* Fix for the gradient text (Tailwind v4 uses bg-gradient-to-r, not bg-linear-to-r) */

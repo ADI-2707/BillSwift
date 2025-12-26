@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../api/base";
@@ -8,6 +8,9 @@ const AddBill = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const editBillId = location.state?.billId;
+  const isReadOnly = location.state?.readOnly || false;
+  const autoAddStarter = location.state?.autoAddStarter;
+  const autoAddRating = location.state?.autoAddRating;
 
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
@@ -28,32 +31,56 @@ const AddBill = () => {
 
   /* ---------------- HELPERS ---------------- */
 
+  const recalcBundle = useCallback((bundle) => {
+    const components = bundle.components.map((c) => {
+      const disc = Number(c.discount_percent || 0);
+      const discountedPrice = Number(c.base_price) * (1 - disc / 100);
+      return { ...c, unit_price: discountedPrice };
+    });
+    const subtotal = components.reduce((sum, c) => {
+      const qty = c.quantity === "" ? 0 : Number(c.quantity);
+      return sum + qty * Number(c.unit_price || 0);
+    }, 0);
+    return { ...bundle, components, subtotal, totalAfterDiscount: subtotal };
+  }, []);
+
+  const billSubtotal = useMemo(() => billBundles.reduce((s, b) => s + b.totalAfterDiscount, 0), [billBundles]);
+  const billDiscountAmount = Math.max(0, billSubtotal * (Number(billDiscountPercent) || 0)) / 100;
+  const grandTotal = Math.max(billSubtotal - billDiscountAmount, 0);
+
   const toggleBundle = (bundleId) => {
     setExpandedBundleIds((prev) =>
       prev.includes(bundleId) ? prev.filter((id) => id !== bundleId) : [...prev, bundleId]
     );
   };
 
-  const recalcBundle = (bundle) => {
-    const components = bundle.components.map((c) => {
-      const disc = Number(c.discount_percent || 0);
-      const discountedPrice = Number(c.base_price) * (1 - disc / 100);
-      return { ...c, unit_price: discountedPrice };
-    });
-    const subtotal = components.reduce(
-      (sum, c) => {
-        // Use 0 if quantity is empty string so subtotal reflects correctly while typing
-        const qty = c.quantity === "" ? 0 : Number(c.quantity);
-        return sum + qty * Number(c.unit_price || 0);
-      },
-      0
-    );
-    return { ...bundle, components, subtotal, totalAfterDiscount: subtotal };
-  };
+  const handleAddBundleInternal = useCallback((starter, rating, bundlesList) => {
+    const prod = bundlesList.find(p => p.starter_type === starter && Number(p.rating_kw) === Number(rating));
+    if (!prod) return;
 
-  const billSubtotal = useMemo(() => billBundles.reduce((s, b) => s + b.totalAfterDiscount, 0), [billBundles]);
-  const billDiscountAmount = Math.max(0, billSubtotal * (Number(billDiscountPercent) || 0)) / 100;
-  const grandTotal = Math.max(billSubtotal - billDiscountAmount, 0);
+    const components = prod.components.map((c) => ({
+      name: c.name,
+      brand_name: c.brand_name,
+      model: c.model || "",
+      quantity: Math.max(1, Number(c.quantity)),
+      base_price: Number(c.unit_price),
+      unit_price: Number(c.unit_price),
+      discount_percent: 0,
+    }));
+
+    const newId = `${prod.id}-${Date.now()}`;
+    const newBundle = recalcBundle({
+      localId: newId,
+      productId: prod.id,
+      starterType: prod.starter_type,
+      ratingKw: prod.rating_kw,
+      components,
+      totalAfterDiscount: 0,
+    });
+
+    setBillBundles(prev => [...prev, newBundle]);
+    setExpandedBundleIds(prev => [...prev, newId]);
+  }, [recalcBundle]);
 
   /* ---------------- INIT ---------------- */
 
@@ -78,7 +105,6 @@ const AddBill = () => {
 
           const loadedBundles = billData.items.map((item, idx) => {
             const originalProduct = products.find(p => p.id === item.product_id);
-            
             return {
               localId: `old-${idx}`,
               productId: item.product_id,
@@ -109,6 +135,9 @@ const AddBill = () => {
           setBillBundles(loadedBundles);
           const discPercent = (billData.discount_amount / billData.subtotal_amount) * 100;
           setBillDiscountPercent(Math.round(discPercent) || 0);
+        } else if (autoAddStarter && autoAddRating) {
+          // If navigated from home page with starter info
+          handleAddBundleInternal(autoAddStarter, autoAddRating, products);
         }
       } catch (err) {
         console.error("Fetch Error:", err);
@@ -117,43 +146,22 @@ const AddBill = () => {
       }
     };
     fetchData();
-  }, [navigate, token, role, authHeaders, editBillId]);
+  }, [navigate, token, role, authHeaders, editBillId, autoAddStarter, autoAddRating, handleAddBundleInternal]);
 
   /* ---------------- HANDLERS ---------------- */
 
   const handleAddBundle = () => {
-    const prod = allBundles.find(p => p.starter_type === starterFilter && Number(p.rating_kw) === Number(ratingFilter));
-    if (!prod) return alert("Bundle not found");
-
-    const components = prod.components.map((c) => ({
-      name: c.name,
-      brand_name: c.brand_name,
-      model: c.model || "",
-      quantity: Math.max(1, Number(c.quantity)),
-      base_price: Number(c.unit_price),
-      unit_price: Number(c.unit_price),
-      discount_percent: 0,
-    }));
-
-    const newId = `${prod.id}-${Date.now()}`;
-    setBillBundles(prev => [...prev, recalcBundle({
-      localId: newId,
-      productId: prod.id,
-      starterType: prod.starter_type,
-      ratingKw: prod.rating_kw,
-      components,
-      totalAfterDiscount: 0,
-    })]);
-    setExpandedBundleIds(prev => [...prev, newId]);
+    handleAddBundleInternal(starterFilter, ratingFilter, allBundles);
   };
 
   const removeBundle = (id) => {
+    if (isReadOnly) return;
     setBillBundles(prev => prev.filter(b => b.localId !== id));
     setExpandedBundleIds(prev => prev.filter(eid => eid !== id));
   };
 
   const updateQuantity = (bundleId, idx, value) => {
-    // Allow empty string temporarily so user can erase digit on mobile
+    if (isReadOnly) return;
     const numValue = value === "" ? "" : Math.max(1, parseInt(value));
     setBillBundles(prev => prev.map(b => {
       if (b.localId !== bundleId) return b;
@@ -164,13 +172,14 @@ const AddBill = () => {
   };
 
   const handleQuantityBlur = (bundleId, idx, value) => {
-    // If field is left blank when user clicks away, reset to 1
+    if (isReadOnly) return;
     if (value === "" || parseInt(value) < 1) {
       updateQuantity(bundleId, idx, "1");
     }
   };
 
   const updateComponentDiscount = (bundleId, idx, value) => {
+    if (isReadOnly) return;
     const numValue = value === "" ? 0 : Math.min(100, Math.max(0, Number(value)));
     setBillBundles((prev) =>
       prev.map((b) => {
@@ -183,6 +192,7 @@ const AddBill = () => {
   };
 
   const addComponentToBundle = (bundleId, component) => {
+    if (isReadOnly) return;
     setBillBundles((prev) =>
       prev.map((b) => {
         if (b.localId !== bundleId) return b;
@@ -203,6 +213,7 @@ const AddBill = () => {
   };
 
   const removeComponent = (bundleId, idx) => {
+    if (isReadOnly) return;
     setBillBundles((prev) =>
       prev.map((b) => {
         if (b.localId !== bundleId) return b;
@@ -255,7 +266,7 @@ const AddBill = () => {
   };
 
   const handleCreateBill = async () => {
-    if (billBundles.length === 0) return;
+    if (billBundles.length === 0 || isReadOnly) return;
     try {
       const items = billBundles.map((b) => ({
         product_id: b.productId,
@@ -285,10 +296,10 @@ const AddBill = () => {
     <div className="home-wrapper">
       <div className="max-w-6xl mx-auto px-4 md:px-10">
         <h1 className="text-3xl md:text-5xl font-black mb-8 text-center bg-linear-to-r from-white to-gray-500 bg-clip-text text-transparent">
-          {editBillId ? "View Order Details" : "Create New Order"}
+          {isReadOnly ? "Order Summary (Read-Only)" : editBillId ? "View Order Details" : "Create New Order"}
         </h1>
 
-        {!editBillId && (
+        {!editBillId && !isReadOnly && (
           <div className="home-card max-w-none! mb-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="flex flex-col gap-1">
@@ -338,7 +349,7 @@ const AddBill = () => {
                     <span className="font-black text-lg sm:text-xl text-green-400 uppercase tracking-tight">
                       {b.starterType} — {b.ratingKw} kW
                     </span>
-                    {!editBillId && (
+                    {!editBillId && !isReadOnly && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -377,7 +388,7 @@ const AddBill = () => {
                             <label className="text-[10px] text-gray-500 uppercase font-bold">Qty</label>
                             <input 
                               type="number" 
-                              disabled={!!editBillId} 
+                              disabled={!!editBillId || isReadOnly} 
                               value={c.quantity} 
                               onFocus={(e) => e.target.select()}
                               onBlur={(e) => handleQuantityBlur(b.localId, idx, e.target.value)}
@@ -388,19 +399,19 @@ const AddBill = () => {
                           </div>
                           <div className="flex flex-col gap-1">
                             <label className="text-[10px] text-gray-500 uppercase font-bold">Disc%</label>
-                            <input type="number" disabled={!!editBillId} value={c.discount_percent} onClick={(e) => e.stopPropagation()} onChange={(e) => updateComponentDiscount(b.localId, idx, e.target.value)} className="w-full sm:w-14 bg-black/40 border border-green-900/40 p-1.5 rounded-lg text-center outline-none focus:border-green-500 text-sm text-green-400 font-bold disabled:opacity-50" />
+                            <input type="number" disabled={!!editBillId || isReadOnly} value={c.discount_percent} onClick={(e) => e.stopPropagation()} onChange={(e) => updateComponentDiscount(b.localId, idx, e.target.value)} className="w-full sm:w-14 bg-black/40 border border-green-900/40 p-1.5 rounded-lg text-center outline-none focus:border-green-500 text-sm text-green-400 font-bold disabled:opacity-50" />
                           </div>
-                          {!editBillId && (
+                          {!editBillId && !isReadOnly && (
                             <button onClick={(e) => { e.stopPropagation(); removeComponent(b.localId, idx); }} className="hidden sm:block text-red-500 hover:text-red-400 p-2 hover:bg-red-500/10 rounded-full transition-all">✕</button>
                           )}
                         </div>
-                        {!editBillId && (
+                        {!editBillId && !isReadOnly && (
                           <button onClick={(e) => { e.stopPropagation(); removeComponent(b.localId, idx); }} className="sm:hidden w-full text-xs text-red-500 py-2 border-t border-white/5 mt-2">Remove Component</button>
                         )}
                       </div>
                     ))}
 
-                    {!editBillId && (
+                    {!editBillId && !isReadOnly && (
                       <div className="mt-4 border-t border-white/5 pt-4">
                         {activeBundleId === b.localId ? (
                           <div className="space-y-3">
@@ -455,11 +466,11 @@ const AddBill = () => {
                   <label className="filter-label">Total Order Discount (%)</label>
                   <input 
                     type="number" 
-                    disabled={!!editBillId} 
+                    disabled={!!editBillId || isReadOnly} 
                     value={billDiscountPercent} 
                     onBlur={(e) => { if(e.target.value === "") setBillDiscountPercent(0); }}
                     onChange={(e) => setBillDiscountPercent(e.target.value === "" ? "" : Math.min(100, Math.max(0, Number(e.target.value))))} 
-                    className="filter-select py-4! text-center font-bold text-xl" 
+                    className="filter-select py-4! text-center font-bold text-xl disabled:opacity-50" 
                   />
                   <p className="text-[10px] text-gray-600 text-center mt-2">This discount is applied to the grand subtotal of all starters.</p>
                 </div>
@@ -484,7 +495,7 @@ const AddBill = () => {
                 </div>
                 
                 <div className="mt-10">
-                  {!editBillId ? (
+                  {!editBillId && !isReadOnly ? (
                     <button onClick={handleCreateBill} className="primary-action-btn w-full text-sm! py-5! shadow-[0_10px_30px_rgba(220,38,38,0.3)] hover:shadow-red-600/50 cursor-pointer">
                       Generate Order
                     </button>

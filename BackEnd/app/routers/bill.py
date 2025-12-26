@@ -134,15 +134,25 @@ def get_my_bills(
 
 @router.get("/{bill_id}", response_model=BillDetailOut)
 def get_bill_detail(
-    bill_id: int,
+    bill_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    bill = (
-        db.query(Bill)
-        .filter(Bill.id == bill_id, Bill.user_id == current_user.id)
-        .first()
-    )
+    # Check if the query is a numeric ID or a Bill Number string
+    if bill_id.isdigit():
+        # Search by Primary Key ID
+        bill = (
+            db.query(Bill)
+            .filter(Bill.id == int(bill_id), Bill.user_id == current_user.id)
+            .first()
+        )
+    else:
+        # Search by the generated Bill Number (e.g., BS-2025-ADMIN001001)
+        bill = (
+            db.query(Bill)
+            .filter(Bill.bill_number == bill_id, Bill.user_id == current_user.id)
+            .first()
+        )
 
     if not bill:
         raise HTTPException(status_code=404, detail="Bill not found")

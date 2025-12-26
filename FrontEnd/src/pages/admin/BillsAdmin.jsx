@@ -128,7 +128,7 @@ const BillsAdmin = () => {
                     </tr>
                   ) : (
                     filteredBills.map((bill) => (
-                      <tr key={bill.id} className="hover:bg-white/[0.02] transition-colors group">
+                      <tr key={bill.id} className="group">
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-3">
                             <div className="p-2 bg-emerald-500/10 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
@@ -158,7 +158,7 @@ const BillsAdmin = () => {
                         <td className="px-6 py-5 text-center">
                           <button
                             onClick={() => deleteBill(bill.id)}
-                            className="p-2.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all active:scale-90 border border-transparent hover:border-red-500/20"
+                            className="p-2.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all active:scale-90 border border-transparent hover:border-red-500/20 cursor-pointer"
                             title="Delete Bill"
                           >
                             <Trash2 className="w-5 h-5" />

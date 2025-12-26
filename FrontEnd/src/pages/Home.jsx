@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import InteractiveGrid from "../components/InteractiveGrid";
@@ -23,6 +23,17 @@ const Home = () => {
   const [loginError, setLoginError] = useState("");
   const [searchError, setSearchError] = useState("");
   const [filterError, setFilterError] = useState("");
+  const [dbProducts, setDbProducts] = useState([]);
+
+  useEffect(() => {
+    if (token) {
+      axios.get(`${API_URL}/products`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => setDbProducts(res.data || []))
+      .catch(err => console.error("Failed to fetch products for home filters", err));
+    }
+  }, [token]);
 
   const handleLoginInput = (e) => {
     setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
@@ -36,7 +47,6 @@ const Home = () => {
 
     try {
       const res = await axios.post(`${API_URL}/auth/login`, loginForm);
-
       localStorage.setItem("token", res.data.access_token);
       localStorage.setItem("role", res.data.role);
       localStorage.setItem("userEmail", res.data.email);
@@ -51,20 +61,32 @@ const Home = () => {
   const handleBillSearch = async () => {
     setSearchError("");
     if (!token) return setSearchError("Please login first!");
-    if (!query.trim()) return setSearchError("Enter a Bill ID to search.");
+    if (!query.trim()) return setSearchError("Enter a Order ID to search.");
 
     const billId = query.trim();
 
     try {
-      const res = await axios.get(`${API_URL}/billing/${billId}`, {
+      // We fetch to verify it exists, then navigate to add-bill in read-only mode
+      await axios.get(`${API_URL}/billing/${billId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      navigate("/view-bills", { state: { billFromSearch: res.data } });
+      navigate("/add-bill", { state: { billId: billId, readOnly: true } });
     } catch (err) {
       if (err.response?.status === 404) {
-        setSearchError("No bill found with this ID for your account.");
+        setSearchError("No bill found with this ID.");
       } else {
-        setSearchError(err.response?.data?.detail || "Search failed");
+        const errorDetail = err.response?.data?.detail;
+        
+        if (typeof errorDetail === 'string') {
+          setSearchError(errorDetail);
+        } else if (Array.isArray(errorDetail)) {
+          // If it's a validation array, grab the first message
+          setSearchError(errorDetail[0]?.msg || "Validation error");
+        } else if (typeof errorDetail === 'object' && errorDetail !== null) {
+          setSearchError(JSON.stringify(errorDetail));
+        } else {
+          setSearchError("Search failed. Please check the Order ID format.");
+        } 
       }
     }
   };
@@ -74,21 +96,18 @@ const Home = () => {
     setSearchError("");
     if (!token) return setSearchError("Please login first!");
 
-    if ((product && !rating) || (!product && rating)) {
-      return setFilterError("Please select both product type and rating.");
-    }
-    if (!product && !rating) {
-      return setFilterError("Select a product and rating to proceed.");
+    if (!product || !rating) {
+      return setFilterError("Please select both starter type and rating.");
     }
 
+    // Redirect to add-bill and pass the selection to be auto-added
     navigate("/add-bill", {
-      state: { product, rating },
+      state: { autoAddStarter: product, autoAddRating: rating },
     });
   };
 
   return (
     <div className="home-wrapper">
-      {/* MAIN BANNER */}
       <div className="text-center pt-10 md:pt-20 mb-8 md:mb-16 px-4">
         <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-6 tracking-tight bg-linear-to-r from-white to-gray-500 bg-clip-text leading-[1.1] text-transparent">
           Manage Bills & Orders Faster with{" "}
@@ -103,13 +122,9 @@ const Home = () => {
         </p>
       </div>
 
-      {/* GRID CONTAINER */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 relative">
-        
-        {/* Vertical Divider - Only visible on Large screens and up */}
         <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px bg-white/10"></div>
 
-        {/* LEFT BOX: ORDERS & SEARCH */}
         <div className="flex justify-center items-start">
           <div className="home-card group">
             {token ? (
@@ -118,15 +133,12 @@ const Home = () => {
                   <span className="text-green-500">O</span>RDERS
                 </h1>
 
-                {searchError && (
-                  <p className="error-box">{searchError}</p>
-                )}
+                {searchError && <p className="error-box">{searchError}</p>}
 
-                {/* BILL SEARCH */}
                 <div className="search-input-container group">
                   <input
                     type="text"
-                    placeholder="Search Bill by ID..."
+                    placeholder="Search Order by ID..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleBillSearch()}
@@ -138,17 +150,14 @@ const Home = () => {
                 </div>
 
                 <p className="text-center text-gray-500 text-xs mt-6 leading-relaxed">
-                  Use Bill ID to quickly find your bills or apply product filters below.
+                  Use Order ID to quickly find your bills or apply product filters below.
                 </p>
 
-                {/* FILTERS */}
                 <div className="flex flex-col gap-5 mt-8 border-t border-white/5 pt-8">
-                  {filterError && (
-                    <p className="error-box">{filterError}</p>
-                  )}
+                  {filterError && <p className="error-box">{filterError}</p>}
 
                   <div className="flex flex-col gap-2">
-                    <label className="filter-label">Product Type</label>
+                    <label className="filter-label">Starter Type</label>
                     <select
                       value={product}
                       onChange={(e) => setProduct(e.target.value)}
@@ -167,19 +176,21 @@ const Home = () => {
                       value={rating}
                       onChange={(e) => setRating(e.target.value)}
                       className="filter-select"
+                      disabled={!product}
                     >
                       <option value="" className="bg-[#1a1a1a]">Select Rating</option>
-                      <option value="0.06" className="bg-[#1a1a1a]">0.06 kW</option>
-                      <option value="0.09" className="bg-[#1a1a1a]">0.09 kW</option>
-                      <option value="0.12" className="bg-[#1a1a1a]">0.12 kW</option>
-                      <option value="0.18" className="bg-[#1a1a1a]">0.18 kW</option>
-                      <option value="0.25" className="bg-[#1a1a1a]">0.25 kW</option>
-                      <option value="0.37" className="bg-[#1a1a1a]">0.37 kW</option>
+                      {dbProducts
+                        .filter(p => p.starter_type === product)
+                        .map(p => (
+                          <option key={p.id} value={p.rating_kw} className="bg-[#1a1a1a]">
+                            {p.rating_kw} kW
+                          </option>
+                        ))}
                     </select>
                   </div>
 
                   <button onClick={handleFilterApply} className="primary-action-btn">
-                    Apply Filters
+                    Create Order
                   </button>
                 </div>
               </>
@@ -191,7 +202,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* RIGHT BOX: LOGIN */}
         <div className="flex justify-center items-start">
           <div className="home-card">
             {!token ? (
@@ -199,11 +209,9 @@ const Home = () => {
                 <h1 className="text-xl font-black tracking-widest text-center mb-6">
                   <span className="text-green-500">L</span>OGIN
                 </h1>
-
                 <p className="text-gray-500 text-sm text-center mb-4 leading-relaxed">
                   Access your account to manage bills and order history.
                 </p>
-
                 <p className="text-center text-xs mb-6">
                   Not a user?{" "}
                   <Link to="/signup" className="text-green-500 font-bold underline hover:text-green-400 ml-1">
@@ -211,9 +219,7 @@ const Home = () => {
                   </Link>
                 </p>
 
-                {loginError && (
-                  <p className="error-box">{loginError}</p>
-                )}
+                {loginError && <p className="error-box">{loginError}</p>}
 
                 <div className="space-y-5">
                   <div className="flex flex-col gap-2">
@@ -226,7 +232,6 @@ const Home = () => {
                       className="filter-select"
                     />
                   </div>
-
                   <div className="flex flex-col gap-2">
                     <label className="filter-label">Password</label>
                     <input
@@ -237,7 +242,6 @@ const Home = () => {
                       className="filter-select"
                     />
                   </div>
-
                   <button onClick={handleLogin} className="primary-action-btn">
                     Login to Portal
                   </button>

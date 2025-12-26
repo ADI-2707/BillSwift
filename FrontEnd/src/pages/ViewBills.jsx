@@ -64,7 +64,7 @@ const ViewBills = () => {
     <div className="home-wrapper">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10">
         <header className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent tracking-tighter">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 bg-linear-to-r from-white to-gray-500 bg-clip-text leading-[1.1] text-transparent tracking-tighter">
             Your Orders
           </h1>
           <p className="text-gray-500 text-sm md:text-base max-w-xl mx-auto">
