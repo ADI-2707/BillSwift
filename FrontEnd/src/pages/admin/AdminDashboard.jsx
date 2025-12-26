@@ -49,7 +49,7 @@ const AdminDashboard = () => {
         <AdminNavbar toggleSidebar={toggleSidebar} />
         
         <div className="px-6 md:px-10 mt-10">
-          <h1 className="text-3xl font-bold bg-linear-to-r from-white to-gray-500 bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl tracking-tight font-black bg-linear-to-r from-white to-gray-500 bg-clip-text leading-[1.1] text-transparent">
             Admin Dashboard
           </h1>
           <p className="text-sm text-gray-400 mt-1">Manage everything from here</p>

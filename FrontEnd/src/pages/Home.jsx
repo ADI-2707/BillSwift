@@ -90,14 +90,14 @@ const Home = () => {
     <div className="home-wrapper">
       {/* MAIN BANNER */}
       <div className="text-center pt-10 md:pt-20 mb-8 md:mb-16 px-4">
-        <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-6 tracking-tight bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent leading-[1.1]">
+        <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-6 tracking-tight bg-linear-to-r from-white to-gray-500 bg-clip-text leading-[1.1] text-transparent">
           Manage Bills & Orders Faster with{" "}
           <br className="hidden lg:block" />
           <span className="text-red-600">
             B<span className="text-white">ill</span>Swift
           </span>
         </h2>
-        <p className="text-gray-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed px-2">
+        <p className="text-gray-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mt-1">
           Track and generate orders, and stay organized with a powerful yet
           simple tool designed for engineering & industrial teams.
         </p>

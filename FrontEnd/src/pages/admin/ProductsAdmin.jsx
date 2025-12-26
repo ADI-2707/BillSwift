@@ -146,7 +146,7 @@ const ProductsAdmin = () => {
 
         <main className="p-4 md:p-10 w-full max-w-5xl mx-auto">
           <header className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold bg-linear-to-r from-white to-gray-500 bg-clip-text">Product Management</h1>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight bg-linear-to-r from-white to-gray-500 bg-clip-text leading-[1.1] text-transparent">Product Management</h1>
             <p className='text-xs md:text-sm text-gray-500 mt-1'>Bundle components into functional products</p>
           </header>
 

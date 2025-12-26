@@ -86,8 +86,8 @@ const PendingUsers = () => {
         <div className="p-4 md:p-10 max-w-7xl mx-auto w-full">
           {/* SECTION 1: PENDING REQUESTS */}
           <div className="mb-12">
-            <h1 className="text-2xl md:text-3xl font-bold bg-linear-to-r from-white to-gray-500 bg-clip-text">User Management</h1>
-            <p className='text-xs md:text-sm text-gray-400 mt-1 mb-6'>Track and authorize users.</p>
+            <h1 className="text-2xl font-black md:text-3xl tracking-tight bg-linear-to-r from-white to-gray-500 bg-clip-text leading-[1.1] text-tranparent">User Management</h1>
+            <p className='text-sm text-gray-400 mt-1 mb-6'>Track and authorize users.</p>
             
             <h2 className="text-lg md:text-xl font-bold mb-6 flex items-center gap-2 text-red-500 uppercase tracking-wider">
               <FiUserPlus /> Pending Requests
