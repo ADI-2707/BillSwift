@@ -46,3 +46,45 @@ body {
 .no-scroll {
   overflow: hidden;
 }
+
+/* HOME PAGE SPECIFIC STYLES */
+
+.home-wrapper {
+  @apply min-h-screen bg-transparent text-white font-sans pb-20 mt-10 md:mt-16;
+}
+
+/* CARDS: Grow with screen, but stay centered on mobile */
+.home-card {
+  @apply flex flex-col bg-[#0a0a0a]/80 border border-white/10 rounded-3xl p-6 sm:p-10 w-full max-w-md lg:max-w-lg shadow-2xl backdrop-blur-sm transition-all duration-500;
+}
+
+.home-card:hover {
+  @apply border-white/20 shadow-green-900/10;
+}
+
+/* ERROR BOXES */
+.error-box {
+  @apply mb-4 text-red-500 text-xs bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2 text-center;
+}
+
+/* INPUTS & SELECTS */
+.search-input-container {
+  @apply flex items-center w-full bg-black/40 border border-white/10 px-4 py-1 rounded-2xl focus-within:border-green-500/50 transition-all;
+}
+
+.search-btn {
+  @apply text-green-500 font-bold hover:text-green-400 text-sm ml-2 active:scale-95 transition-all;
+}
+
+.filter-label {
+  @apply text-gray-500 text-[10px] uppercase font-bold tracking-widest ml-1;
+}
+
+.filter-select {
+  @apply bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-green-500 outline-none transition-all cursor-pointer;
+}
+
+/* BUTTONS */
+.primary-action-btn {
+  @apply mt-4 bg-red-600 hover:bg-red-500 text-white font-black py-4 rounded-xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs;
+}

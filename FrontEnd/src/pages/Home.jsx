@@ -87,29 +87,31 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-white font-sans pb-20  rounded-lg mt-20">
+    <div className="home-wrapper">
       {/* MAIN BANNER */}
-      <div className="text-center pt-20 mb-12 px-4">
-        <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tight bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
+      <div className="text-center pt-10 md:pt-20 mb-8 md:mb-16 px-4">
+        <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-6 tracking-tight bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent leading-[1.1]">
           Manage Bills & Orders Faster with{" "}
+          <br className="hidden lg:block" />
           <span className="text-red-600">
             B<span className="text-white">ill</span>Swift
           </span>
         </h2>
-        <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
+        <p className="text-gray-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed px-2">
           Track and generate orders, and stay organized with a powerful yet
           simple tool designed for engineering & industrial teams.
         </p>
       </div>
 
       {/* GRID CONTAINER */}
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 relative">
-        {/* Divider for Desktop */}
-        <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-white/10"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 relative">
+        
+        {/* Vertical Divider - Only visible on Large screens and up */}
+        <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px bg-white/10"></div>
 
         {/* LEFT BOX: ORDERS & SEARCH */}
-        <div className="flex justify-center">
-          <div className="flex flex-col bg-[#0a0a0a]/80 border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl backdrop-blur-sm">
+        <div className="flex justify-center items-start">
+          <div className="home-card group">
             {token ? (
               <>
                 <h1 className="text-xl font-black tracking-widest text-center mb-6">
@@ -117,13 +119,11 @@ const Home = () => {
                 </h1>
 
                 {searchError && (
-                  <p className="mb-4 text-red-500 text-xs bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2 text-center">
-                    {searchError}
-                  </p>
+                  <p className="error-box">{searchError}</p>
                 )}
 
-                {/* 🔍 BILL SEARCH */}
-                <div className="group flex items-center w-full bg-black/40 border border-white/10 px-4 py-1 rounded-2xl focus-within:border-green-500/50 transition-all">
+                {/* BILL SEARCH */}
+                <div className="search-input-container group">
                   <input
                     type="text"
                     placeholder="Search Bill by ID..."
@@ -132,10 +132,7 @@ const Home = () => {
                     onKeyDown={(e) => e.key === "Enter" && handleBillSearch()}
                     className="bg-transparent outline-none placeholder-gray-600 w-full py-3 text-sm focus:text-white"
                   />
-                  <button
-                    onClick={handleBillSearch}
-                    className="text-green-500 font-bold hover:text-green-400 text-sm ml-2 active:scale-95 transition-all"
-                  >
+                  <button onClick={handleBillSearch} className="search-btn">
                     Search
                   </button>
                 </div>
@@ -147,17 +144,15 @@ const Home = () => {
                 {/* FILTERS */}
                 <div className="flex flex-col gap-5 mt-8 border-t border-white/5 pt-8">
                   {filterError && (
-                    <p className="text-red-500 text-xs bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2 text-center">
-                      {filterError}
-                    </p>
+                    <p className="error-box">{filterError}</p>
                   )}
 
                   <div className="flex flex-col gap-2">
-                    <label className="text-gray-500 text-[10px] uppercase font-bold tracking-widest ml-1">Product Type</label>
+                    <label className="filter-label">Product Type</label>
                     <select
                       value={product}
                       onChange={(e) => setProduct(e.target.value)}
-                      className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-green-500 outline-none transition-all cursor-pointer appearance-none"
+                      className="filter-select"
                     >
                       <option value="" className="bg-[#1a1a1a]">Select Product</option>
                       <option value="DOL" className="bg-[#1a1a1a]">DOL Starter</option>
@@ -167,11 +162,11 @@ const Home = () => {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label className="text-gray-500 text-[10px] uppercase font-bold tracking-widest ml-1">Rating (kW)</label>
+                    <label className="filter-label">Rating (kW)</label>
                     <select
                       value={rating}
                       onChange={(e) => setRating(e.target.value)}
-                      className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-green-500 outline-none transition-all cursor-pointer appearance-none"
+                      className="filter-select"
                     >
                       <option value="" className="bg-[#1a1a1a]">Select Rating</option>
                       <option value="0.06" className="bg-[#1a1a1a]">0.06 kW</option>
@@ -183,16 +178,13 @@ const Home = () => {
                     </select>
                   </div>
 
-                  <button
-                    onClick={handleFilterApply}
-                    className="mt-4 bg-red-600 hover:bg-red-500 text-white font-black py-4 rounded-xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs"
-                  >
+                  <button onClick={handleFilterApply} className="primary-action-btn">
                     Apply Filters
                   </button>
                 </div>
               </>
             ) : (
-              <div className="flex items-center justify-center p-4">
+              <div className="flex items-center justify-center p-4 min-h-[300px]">
                 <InteractiveGrid />
               </div>
             )}
@@ -200,8 +192,8 @@ const Home = () => {
         </div>
 
         {/* RIGHT BOX: LOGIN */}
-        <div className="flex justify-center">
-          <div className="flex flex-col bg-[#0a0a0a]/80 border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl backdrop-blur-sm">
+        <div className="flex justify-center items-start">
+          <div className="home-card">
             {!token ? (
               <>
                 <h1 className="text-xl font-black tracking-widest text-center mb-6">
@@ -214,53 +206,45 @@ const Home = () => {
 
                 <p className="text-center text-xs mb-6">
                   Not a user?{" "}
-                  <Link
-                    to="/signup"
-                    className="text-green-500 font-bold underline hover:text-green-400 ml-1"
-                  >
+                  <Link to="/signup" className="text-green-500 font-bold underline hover:text-green-400 ml-1">
                     Sign Up
                   </Link>
                 </p>
 
                 {loginError && (
-                  <p className="mb-6 text-red-500 text-xs bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2 text-center">
-                    {loginError}
-                  </p>
+                  <p className="error-box">{loginError}</p>
                 )}
 
                 <div className="space-y-5">
                   <div className="flex flex-col gap-2">
-                    <label className="text-gray-500 text-[10px] uppercase font-bold tracking-widest ml-1">Email</label>
+                    <label className="filter-label">Email</label>
                     <input
                       name="email"
                       type="email"
                       onChange={handleLoginInput}
                       placeholder="Enter your email"
-                      className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-green-500 outline-none transition-all placeholder:text-gray-700"
+                      className="filter-select"
                     />
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label className="text-gray-500 text-[10px] uppercase font-bold tracking-widest ml-1">Password</label>
+                    <label className="filter-label">Password</label>
                     <input
                       name="password"
                       type="password"
                       onChange={handleLoginInput}
                       placeholder="Enter your password"
-                      className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-green-500 outline-none transition-all placeholder:text-gray-700"
+                      className="filter-select"
                     />
                   </div>
 
-                  <button
-                    onClick={handleLogin}
-                    className="w-full mt-6 bg-red-600 hover:bg-red-500 text-white font-black py-4 rounded-xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs"
-                  >
+                  <button onClick={handleLogin} className="primary-action-btn">
                     Login to Portal
                   </button>
                 </div>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20">
+              <div className="flex flex-col items-center justify-center py-24">
                 <div className="w-12 h-12 border-4 border-green-500/20 border-t-green-500 rounded-full animate-spin mb-4"></div>
                 <p className="text-gray-500 text-xs font-bold tracking-tighter animate-pulse">
                   ✨ Dashboard Animation Incoming...
