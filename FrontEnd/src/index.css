@@ -8,6 +8,10 @@ body {
   min-height: 100vh;
 }
 
+.pl {
+  padding-left: 3rem !important;
+}
+
 /* NAVBAR BASE CONTAINER */
 .navbar-container {
   @apply flex justify-between items-center mx-auto my-6 px-6 py-3 rounded-full backdrop-blur-lg bg-white/5 border border-white/10 transition-all duration-300;
@@ -102,4 +106,86 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #444;
+}
+
+/* VIEW BILLS SPECIFIC STYLES */
+
+/* Transitions for the order cards */
+.group {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.group:hover {
+  transform: translateY(-8px);
+}
+
+/* Enhancing the mono font readability */
+.font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Ensuring buttons have a consistent tracking for the uppercase style */
+button.uppercase {
+  letter-spacing: 0.15em;
+}
+
+/* Custom shadow for green hover state */
+.hover\:shadow-green-900\/10:hover {
+  box-shadow: 0 20px 25px -5px rgba(22, 101, 52, 0.1), 0 10px 10px -5px rgba(22, 101, 52, 0.04);
+}
+
+/* Media Query for scaling container width on large screens */
+@media (min-width: 1536px) {
+  .max-w-6xl {
+    max-width: 1440px;
+  }
+}
+
+/* ACCOUNT PAGE DATE INPUT FIX */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.5); /* Makes the calendar icon visible on dark bg */
+  cursor: pointer;
+}
+
+input[type="date"] {
+  color-scheme: dark; /* Standard modern way to style date pickers for dark mode */
+}
+
+/* Ensure the table scrollbar isn't ugly on mobile */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.2);
+  border-radius: 10px;
+}
+
+/* 1. Force the native text and internal UI to be light/visible */
+input[type="date"] {
+  color-scheme: dark;
+}
+
+/* 2. The "Magic" fix: Stretch the native picker trigger to cover the whole input */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  color: transparent;
+  /* This ensures the Lucide icon underneath is still visible but the click hits the trigger */
+  opacity: 0; 
+}
+
+/* 3. Ensure the custom class handles text placement so it doesn't hit your icon */
+.date-input-custom {
+  position: relative;
+  padding-left: 3rem !important;
 }
