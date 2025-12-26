@@ -137,7 +137,7 @@ const BillsAdmin = () => {
                     </tr>
                   ) : (
                     filteredBills.map((bill) => (
-                      <tr key={bill.id} className="hover:bg-white/[0.02] transition-colors group">
+                      <tr key={bill.id} className="transition-colors group">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="p-2 bg-emerald-500/10 rounded-lg">
