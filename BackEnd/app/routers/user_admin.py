@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.user import User
 from app.auth.jwt_handler import require_admin
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/admin/users", tags=["Admin Users"])
 
@@ -121,3 +122,33 @@ def get_dashboard_stats(
         "products_count": total_products,
         "bills_count": total_bills,
     }
+
+class UserStatusUpdate(BaseModel):
+    is_active: bool
+
+
+@router.patch("/{user_id}/status")
+def toggle_user_status(
+    user_id: int,
+    status_data: UserStatusUpdate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    """
+    Toggle a user's active status. 
+    Setting is_active to False will prevent them from making further requests.
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Prevent admins from deactivating themselves accidentally
+    if user.role == "admin":
+         raise HTTPException(status_code=400, detail="Cannot toggle status of admin accounts")
+
+    user.is_active = status_data.is_active
+    db.commit()
+    db.refresh(user)
+
+    return {"detail": f"User {'activated' if user.is_active else 'deactivated'} successfully"}
