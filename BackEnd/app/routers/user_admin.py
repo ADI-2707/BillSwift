@@ -4,10 +4,13 @@ from app.db.session import get_db
 from app.models.user import User
 from app.auth.jwt_handler import require_admin
 from pydantic import BaseModel
+from app.auth.security import verify_password, hash_password
 
 router = APIRouter(prefix="/admin/users", tags=["Admin Users"])
 
-
+class AdminPasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str
 
 #  GET PENDING USERS
 @router.get("/pending")
@@ -153,3 +156,26 @@ def toggle_user_status(
     db.refresh(user)
 
     return {"detail": f"User {'activated' if user.is_active else 'deactivated'} successfully"}
+
+@router.put("/update-password")
+def update_admin_password(
+    data: AdminPasswordUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    # 1. Verify current password
+    if not verify_password(data.current_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=400, 
+            detail="Current password is incorrect"
+        )
+
+    # 2. Hash and update with new password
+    current_user.password_hash = hash_password(data.new_password)
+    
+    # 3. Save to database
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+
+    return {"detail": "Password updated successfully"}

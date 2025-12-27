@@ -24,3 +24,7 @@ class UserOut(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+class AdminPasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str
