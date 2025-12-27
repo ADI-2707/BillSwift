@@ -59,7 +59,7 @@ const AdminDashboard = () => {
           <p className="text-red-500 text-sm text-center mt-4">{error}</p>
         )}
 
-        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
           <DashboardCard title="Pending Approvals" value={stats.pending_users} />
           <DashboardCard title="Total Users" value={stats.total_users} />
           <DashboardCard title="Products Listed" value={stats.products_count} />
@@ -71,11 +71,15 @@ const AdminDashboard = () => {
   );
 };
 
+export default AdminDashboard;
+
 const DashboardCard = ({ title, value }) => (
-  <div className="bg-green-200/10 backdrop-blur-md border border-white/20 p-6 rounded-xl text-center shadow-md hover:border-green-500/30 transition-all">
-    <h4 className="text-xs md:text-sm text-gray-300 uppercase tracking-wider">{title}</h4>
-    <p className="text-2xl md:text-3xl font-bold mt-2 text-green-400">{value}</p>
+  <div className="bg-green-200/10 backdrop-blur-md border border-white/20 p-4 md:p-6 rounded-xl text-center shadow-md hover:border-green-500/30 transition-all flex flex-col justify-center min-w-0">
+    <h4 className="text-[10px] sm:text-xs md:text-sm text-gray-300 uppercase tracking-wider wrap-break-word">
+      {title}
+    </h4>
+    <p className="text-xl md:text-3xl font-bold mt-2 text-green-400">
+      {value}
+    </p>
   </div>
 );
-
-export default AdminDashboard;
