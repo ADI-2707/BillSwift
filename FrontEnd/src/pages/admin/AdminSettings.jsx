@@ -56,7 +56,7 @@ const AdminSettings = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-[#0a0a0a]/80 border-2 border-white/20 rounded-lg text-white mt-10 mx-2 md:mx-4 overflow-hidden">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#0a0a0a]/80 border-2 border-white/20 rounded-lg text-white mt-10 mx-2 md:mx-4 overflow-hidden backdrop-blur-2xl">
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       
       <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
@@ -87,7 +87,7 @@ const AdminSettings = () => {
             )}
 
             {/* PASSWORD CHANGE UI */}
-            <div className="bg-white/5 border border-white/10 p-6 md:p-8 rounded-2xl backdrop-blur-md shadow-2xl">
+            <div className="bg-white/5 border border-white/10 p-6 md:p-8 rounded-2xl backdrop-blur-md shadow-2xl shadow-black/30">
               <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-6 flex items-center gap-2">
                 <FiLock /> Change Password
               </h3>
@@ -111,7 +111,7 @@ const AdminSettings = () => {
                     placeholder=""
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-green-500 outline-none transition-all placeholder:text-gray-700"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-green-500 focus:bg-white focus:text-black outline-none transition-all placeholder:text-gray-700"
                   />
                 </div>
 
