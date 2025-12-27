@@ -364,5 +364,9 @@ input[type="password"]::placeholder {
 }
 
 .custom-heading-admin {
-  @apply text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-white to-gray-500 bg-clip-text leading-tight text-transparent w-fit;
+  @apply text-2xl md:text-3xl font-black tracking-tight bg-linear-to-r from-white to-gray-500 bg-clip-text leading-tight text-transparent w-fit;
+}
+ 
+.custom-heading {
+  @apply font-black tracking-tight bg-linear-to-r from-white to-gray-500 bg-clip-text leading-tight text-transparent;
 }

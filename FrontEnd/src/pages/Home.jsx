@@ -109,7 +109,7 @@ const Home = () => {
   return (
     <div className="home-wrapper">
       <div className="text-center pt-10 md:pt-20 mb-8 md:mb-16 px-4">
-        <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-6 tracking-tight bg-linear-to-r from-white to-gray-500 bg-clip-text leading-[1.1] text-transparent">
+        <h2 className="text-4xl sm:text-5xl lg:text-7xl mb-6 custom-heading">
           Manage Bills & Orders Faster with{" "}
           <br className="hidden lg:block" />
           <span className="text-red-600">

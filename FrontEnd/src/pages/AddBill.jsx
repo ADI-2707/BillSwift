@@ -295,7 +295,7 @@ const AddBill = () => {
   return (
     <div className="home-wrapper">
       <div className="max-w-6xl mx-auto px-4 md:px-10">
-        <h1 className="text-3xl md:text-5xl font-black mb-10 text-center bg-linear-to-r from-white to-gray-500 bg-clip-text text-transparent">
+        <h1 className="text-3xl md:text-5xl mb-10 text-center custom-heading">
           {isReadOnly ? "Order Summary" : editBillId ? "View Order Details" : "Create New Order"}
         </h1>
 
