@@ -64,9 +64,9 @@ const AdminSettings = () => {
 
         <div className="p-6 md:p-10 w-full max-w-2xl mx-auto">
           <header className="mb-10 text-center md:text-left">
-            <h2 className="custom-heading-admin">
+            <h1 className="custom-heading-admin">
               Admin Settings
-            </h2>
+            </h1>
             <p className='text-xs md:text-sm text-gray-400 mt-1 flex items-center justify-center md:justify-start gap-2'>
               <FiShield className="text-green-500" /> Security and Account Management
             </p>

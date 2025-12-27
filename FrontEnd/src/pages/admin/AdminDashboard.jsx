@@ -49,9 +49,9 @@ const AdminDashboard = () => {
         <AdminNavbar toggleSidebar={toggleSidebar} />
         
         <div className="px-6 md:px-10 mt-10">
-          <h2 className="custom-heading-admin">
+          <h1 className="custom-heading-admin">
             Admin Dashboard
-          </h2>
+          </h1>
           <p className="text-xs md:text-sm text-gray-400 mt-1">Manage everything from here</p>
         </div>
 
