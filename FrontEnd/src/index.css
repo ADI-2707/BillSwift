@@ -3,15 +3,7 @@
 body {
   margin: 0;
   padding: 0;
-  /* background: linear-gradient(45deg, #111, black); */
-  background:
-    radial-gradient(
-      ellipse at center,
-      rgba(17, 17, 17, 0.9) 0%,
-      rgba(65, 62, 64, 0.85) 35%,
-      rgba(40, 40, 40, 0.9) 70%,
-      rgba(0, 0, 0, 0.8) 100%
-    );
+  background: linear-gradient(180deg, #1c1c1c 0%, #141414 50%, #0e0e0e 100%);
   backdrop-filter: blur(10px);
   color: white;
   min-height: 100vh;
@@ -42,7 +34,7 @@ body {
 }
 
 .nav_link::after {
-  content: '';
+  content: "";
   @apply absolute bottom-0 left-0 w-0 h-[2px] bg-green-600 transition-all duration-300;
 }
 
@@ -55,7 +47,7 @@ body {
 }
 
 .nav_link-1::after {
-  content: '';
+  content: "";
   @apply absolute bottom-0 left-0 w-0 h-[2px] bg-red-600 transition-all duration-300;
 }
 
@@ -68,7 +60,7 @@ body {
 }
 
 .nav_link-2::after {
-  content: '';
+  content: "";
   @apply absolute bottom-0 left-0 w-0 h-[2px] bg-amber-600 transition-all duration-300;
 }
 
@@ -124,7 +116,7 @@ body {
 }
 
 .filter-select-1 {
-  @apply bg-transparent outline-none placeholder-gray-600 w-full py-3 text-sm focus:text-white
+  @apply bg-transparent outline-none placeholder-gray-600 w-full py-3 text-sm focus:text-white;
 }
 
 /* BUTTONS */
@@ -162,7 +154,8 @@ body {
 
 /* Enhancing the mono font readability */
 .font-mono {
-  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular,
+    monospace;
 }
 
 /* Ensuring buttons have a consistent tracking for the uppercase style */
@@ -172,7 +165,8 @@ button.uppercase {
 
 /* Custom shadow for green hover state */
 .hover\:shadow-green-900\/10:hover {
-  box-shadow: 0 20px 25px -5px rgba(22, 101, 52, 0.1), 0 10px 10px -5px rgba(22, 101, 52, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(22, 101, 52, 0.1),
+    0 10px 10px -5px rgba(22, 101, 52, 0.04);
 }
 
 /* Media Query for scaling container width on large screens */
@@ -222,7 +216,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background: transparent;
   color: transparent;
   /* This ensures the Lucide icon underneath is still visible but the click hits the trigger */
-  opacity: 0; 
+  opacity: 0;
 }
 
 /* 3. Ensure the custom class handles text placement so it doesn't hit your icon */
@@ -252,7 +246,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* Ensure background gradient text works on all browsers */
 .bg-gradient-to-r {
-  background-image: linear-gradient(to right, var(--tw-gradient-stops, #fff, #6b7280));
+  background-image: linear-gradient(
+    to right,
+    var(--tw-gradient-stops, #fff, #6b7280)
+  );
 }
 
 /* Custom scrollbar for the table overflow */
@@ -284,19 +281,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* Ensure numbers don't show increment arrows for cleaner UI */
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
-input[type=number] {
+input[type="number"] {
   -moz-appearance: textfield;
 }
 
 /* Pulse animation for the search loader */
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -333,9 +335,16 @@ input[type=number] {
 
 /* Shake animation for errors */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
 
 .animate-shake {
