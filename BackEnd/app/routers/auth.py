@@ -35,6 +35,7 @@ def signup(request: Request, payload: UserCreate, db: Session = Depends(get_db))
         team=payload.team,
         password_hash=hashed,
         role="user",
+        is_approved=False,
         is_active=False
     )
     db.add(user)
@@ -57,10 +58,16 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    if not user.is_active:
+    if not user.is_approved:
         raise HTTPException(
             status_code=403,
             detail="Your account is waiting approval from admin."
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=403, 
+            detail="Your access has been revoked!"
         )
 
     token = create_access_token(user)

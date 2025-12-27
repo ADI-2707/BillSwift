@@ -21,7 +21,7 @@ def get_pending_users(
     """
     pending_users = (
         db.query(User)
-        .filter(User.role == "user", User.is_active == False)  # noqa: E712
+        .filter(User.role == "user", User.is_approved == False)  # noqa: E712
         .all()
     )
 
@@ -85,6 +85,7 @@ def approve_user(
     if user.is_active:
         raise HTTPException(status_code=400, detail="User is already approved")
 
+    user.is_approved = True
     user.is_active = True
     db.commit()
     db.refresh(user)
