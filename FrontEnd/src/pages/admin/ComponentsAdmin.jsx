@@ -110,7 +110,7 @@ const ComponentsAdmin = () => {
         
         <div className="p-4 md:p-10 max-w-5xl mx-auto w-full">
           <header className="mb-8">
-             <h1 className="text-2xl md:text-3xl font-black tracking-tight bg-linear-to-r from-white to-gray-500 bg-clip-text leading-[1.1] text-transparent">
+             <h1 className="custom-heading-admin">
                Components Management
              </h1>
              <p className="text-xs md:text-sm text-gray-400 mt-1">Configure and price your inventory</p>

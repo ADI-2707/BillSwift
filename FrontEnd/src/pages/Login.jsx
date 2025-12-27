@@ -109,7 +109,7 @@ const Login = () => {
         {/* LOGIN BUTTON */}
         <button
           onClick={handleLogin}
-          className="bg-red-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-700 active:scale-95 transition duration-150 mt-2 w-32 cursor-pointer"
+          className="primary-action-btn-1"
         >
           Login
         </button>

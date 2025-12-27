@@ -41,9 +41,35 @@ body {
   @apply w-full;
 }
 
+.nav_link-1 {
+  @apply relative py-1 px-2 transition-all duration-300 ease-in-out;
+}
+
+.nav_link-1::after {
+  content: '';
+  @apply absolute bottom-0 left-0 w-0 h-[2px] bg-red-600 transition-all duration-300;
+}
+
+.nav_link-1:hover::after {
+  @apply w-full;
+}
+
+.nav_link-2 {
+  @apply relative py-1 px-2 transition-all duration-300 ease-in-out;
+}
+
+.nav_link-2::after {
+  content: '';
+  @apply absolute bottom-0 left-0 w-0 h-[2px] bg-amber-600 transition-all duration-300;
+}
+
+.nav_link-2:hover::after {
+  @apply w-full;
+}
+
 /* ACCOUNT CIRCLE */
 .account-circle {
-  @apply flex items-center justify-center h-10 w-10 rounded-full bg-green-600 text-white font-bold cursor-pointer border border-white hover:border-2 hover:bg-green-700 transition-all active:scale-95;
+  @apply flex items-center justify-center h-10 w-10 rounded-full bg-green-600 text-white font-bold cursor-pointer border border-white hover:border-2 hover:bg-green-700 transition-all active:scale-95 duration-200;
 }
 
 /* PREVENT SCROLL WHEN MOBILE MENU OPEN (Optional: logic needed in JS to toggle class on body) */
@@ -81,16 +107,24 @@ body {
 }
 
 .filter-label {
-  @apply text-gray-500 text-[10px] uppercase font-bold tracking-widest ml-1;
+  @apply text-gray-500 text-[10px] uppercase font-bold tracking-widest ml-1 focus:text-black;
 }
 
 .filter-select {
-  @apply bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-green-500 outline-none transition-all cursor-pointer;
+  @apply bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-green-500 focus:bg-white focus:text-black outline-none transition-all cursor-pointer;
+}
+
+.filter-select-1 {
+  @apply bg-transparent outline-none placeholder-gray-600 w-full py-3 text-sm focus:text-white
 }
 
 /* BUTTONS */
 .primary-action-btn {
   @apply mt-4 bg-red-600 hover:bg-red-500 text-white font-black py-4 rounded-xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs;
+}
+
+.primary-action-btn-1 {
+  @apply mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 w-32 rounded-lg shadow-xl transition-all active:scale-95 cursor-pointer;
 }
 
 /* Scrollbar styling for the component search results */
@@ -309,4 +343,8 @@ input[type="password"] {
 input[type="password"]::placeholder {
   letter-spacing: normal;
   font-family: inherit;
+}
+
+.custom-heading-admin {
+  @apply text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-white to-gray-500 bg-clip-text leading-tight text-transparent w-fit;
 }

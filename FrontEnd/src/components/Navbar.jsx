@@ -72,16 +72,16 @@ const Navbar = () => {
         <div className="hidden lg:flex gap-4 xl:gap-8 text-lg xl:text-xl items-center">
           {isLoggedIn() ? (
             <>
-              <button onClick={handleLogout} className="nav_link cursor-pointer">
-                Logout
+              <button onClick={handleLogout} className="nav_link-1 cursor-pointer">
+                <span className="text-red-500">L</span>ogout
               </button>
 
               {role === "admin" && (
                 <button
                   onClick={() => navigate("/admin")}
-                  className="nav_link text-yellow-400 cursor-pointer"
+                  className="nav_link-2 cursor-pointer"
                 >
-                  Admin
+                  <span className="text-amber-500">A</span>dmin
                 </button>
               )}
 
@@ -94,8 +94,8 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <NavLink to="/login" className="nav_link">Login</NavLink>
-              <NavLink to="/signup" className="nav_link">Sign Up</NavLink>
+              <NavLink to="/login" className="nav_link"><span className="text-green-500">L</span>ogin</NavLink>
+              <NavLink to="/signup" className="nav_link"><span className="text-green-500">S</span>ign Up</NavLink>
             </>
           )}
         </div>
@@ -119,16 +119,16 @@ const Navbar = () => {
           <HiX />
         </button>
 
-        <NavLink to="/" className="nav_link text-3xl" onClick={() => setOpen(false)}>Home</NavLink>
-        <button onClick={() => { setOpen(false); goToAddBill(); }} className="nav_link text-3xl">Add Order</button>
-        <button onClick={() => { setOpen(false); goToViewBills(); }} className="nav_link text-3xl">View Orders</button>
+        <NavLink to="/" className="nav_link text-3xl" onClick={() => setOpen(false)}><span className="text-green-500">H</span>ome</NavLink>
+        <button onClick={() => { setOpen(false); goToAddBill(); }} className="nav_link text-3xl"><span className="text-green-500">A</span>dd Order</button>
+        <button onClick={() => { setOpen(false); goToViewBills(); }} className="nav_link text-3xl"><span className="text-green-500">V</span>iew Orders</button>
 
         {isLoggedIn() && role === "admin" && (
           <button
             onClick={() => { setOpen(false); navigate("/admin"); }}
-            className="nav_link text-3xl text-yellow-400"
+            className="nav_line-2 text-3xl"
           >
-            Admin
+            <span className="text-amber-500">A</span>dmin
           </button>
         )}
 
@@ -141,14 +141,14 @@ const Navbar = () => {
               >
                 {getInitials()}
               </button>
-              <button onClick={() => { setOpen(false); handleLogout(); }} className="nav_link text-red-500">
-                Logout
+              <button onClick={() => { setOpen(false); handleLogout(); }} className="nav_link"><span className="text-red-500">L</span>
+                ogout
               </button>
             </>
           ) : (
             <div className="flex gap-8">
-              <NavLink to="/login" className="nav_link" onClick={() => setOpen(false)}>Login</NavLink>
-              <NavLink to="/signup" className="nav_link" onClick={() => setOpen(false)}>Sign Up</NavLink>
+              <NavLink to="/login" className="nav_link" onClick={() => setOpen(false)}><span className="text-green-500">L</span>ogin</NavLink>
+              <NavLink to="/signup" className="nav_link" onClick={() => setOpen(false)}><span className="text-green-500">S</span>ign Up</NavLink>
             </div>
           )}
         </div>

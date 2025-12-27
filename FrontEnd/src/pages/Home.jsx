@@ -142,7 +142,7 @@ const Home = () => {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleBillSearch()}
-                    className="bg-transparent outline-none placeholder-gray-600 w-full py-3 text-sm focus:text-white"
+                    className="filter-select-1"
                   />
                   <button onClick={handleBillSearch} className="search-btn">
                     Search
@@ -242,9 +242,11 @@ const Home = () => {
                       className="filter-select"
                     />
                   </div>
-                  <button onClick={handleLogin} className="primary-action-btn">
-                    Login to Portal
+                  <div className="flex justify-center mt-4">
+                  <button onClick={handleLogin} className="primary-action-btn-1">
+                    Login
                   </button>
+                  </div>
                 </div>
               </>
             ) : (

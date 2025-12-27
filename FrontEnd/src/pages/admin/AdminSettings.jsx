@@ -64,10 +64,10 @@ const AdminSettings = () => {
 
         <div className="p-6 md:p-10 w-full max-w-2xl mx-auto">
           <header className="mb-10 text-center md:text-left">
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight bg-linear-to-r from-white to-gray-500 bg-clip-text leading-[1.1] text-tranparent">
+            <h2 className="custom-heading-admin">
               Admin Settings
             </h2>
-            <p className='text-sm text-gray-400 mt-1 flex items-center justify-center md:justify-start gap-2'>
+            <p className='text-xs md:text-sm text-gray-400 mt-1 flex items-center justify-center md:justify-start gap-2'>
               <FiShield className="text-green-500" /> Security and Account Management
             </p>
           </header>

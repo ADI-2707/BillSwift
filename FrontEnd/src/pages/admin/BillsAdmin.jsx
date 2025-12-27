@@ -76,7 +76,7 @@ const BillsAdmin = () => {
         <div className="p-4 md:p-10 max-w-6xl mx-auto w-full">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-black tracking-tight bg-linear-to-r from-white to-gray-500 bg-clip-text leading-[1.1] text-transparent">
+              <h2 className="custom-heading-admin">
                 Order Management
               </h2>
               <p className="text-gray-400 text-xs md:text-sm mt-1">Review and manage all customer bills</p>

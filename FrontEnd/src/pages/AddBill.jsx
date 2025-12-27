@@ -295,12 +295,12 @@ const AddBill = () => {
   return (
     <div className="home-wrapper">
       <div className="max-w-6xl mx-auto px-4 md:px-10">
-        <h1 className="text-3xl md:text-5xl font-black mb-8 text-center bg-linear-to-r from-white to-gray-500 bg-clip-text text-transparent">
-          {isReadOnly ? "Order Summary (Read-Only)" : editBillId ? "View Order Details" : "Create New Order"}
+        <h1 className="text-3xl md:text-5xl font-black mb-10 text-center bg-linear-to-r from-white to-gray-500 bg-clip-text text-transparent">
+          {isReadOnly ? "Order Summary" : editBillId ? "View Order Details" : "Create New Order"}
         </h1>
 
         {!editBillId && !isReadOnly && (
-          <div className="home-card max-w-none! mb-10">
+          <div className="home-card max-w-none! mb-10 mt-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="flex flex-col gap-1">
                 <label className="filter-label">Starter Type</label>
@@ -327,7 +327,7 @@ const AddBill = () => {
                 </select>
               </div>
               <div className="flex items-end">
-                <button onClick={handleAddBundle} className="primary-action-btn w-full mt-0! py-3! cursor-pointer">
+                <button onClick={handleAddBundle} className="primary-action-btn w-full mt-0! py-3.5!">
                    + Add Starter Type
                 </button>
               </div>

@@ -111,7 +111,7 @@ const Account = () => {
       <div className="pt-6 md:pt-12 pb-8 md:pb-12">
         <div className="max-w-6xl mx-auto px-4 md:px-10">
           <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
-            <div className="h-24 w-24 md:h-32 md:w-32 rounded-full bg-emerald-600 flex items-center justify-center text-4xl font-black text-white shadow-2xl border-4 border-white/10 ring-4 ring-emerald-500/20">
+            <div className="h-24 w-24 md:h-32 md:w-32 rounded-full bg-green-600 flex items-center justify-center text-4xl font-black text-white shadow-2xl border-4 border-white/10 ring-4 ring-emerald-500/20">
               {user.first_name[0]}{user.last_name[0]}
             </div>
             <div className="flex-1 pb-2">
