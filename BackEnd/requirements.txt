@@ -1,6 +1,10 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.0
 SQLAlchemy==2.0.36
-psycopg2-binary==2.9.10  # PostgreSQL driver
-python-dotenv==1.0.1     # For loading .env (optional, but handy)
+psycopg2-binary==2.9.10
+python-dotenv==1.0.1
 argon2-cffi
+slowapi
+passlib[bcrypt]
+email-validator
+python-jose[cryptography]

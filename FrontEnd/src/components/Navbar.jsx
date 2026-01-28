@@ -111,7 +111,7 @@ const Navbar = () => {
 
       {/* MOBILE/TABLET OVERLAY MENU */}
       <div
-        className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-50 flex flex-col items-center justify-center gap-8 text-2xl transition-all duration-300 ${
+        className={`fixed inset-0 bg-[#111]/85 backdrop-blur-xl z-50 flex flex-col items-center justify-center gap-8 text-2xl transition-all duration-300 ${
           open ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
         }`}
       >
@@ -119,14 +119,14 @@ const Navbar = () => {
           <HiX />
         </button>
 
-        <NavLink to="/" className="nav_link text-3xl" onClick={() => setOpen(false)}><span className="text-green-500">H</span>ome</NavLink>
-        <button onClick={() => { setOpen(false); goToAddBill(); }} className="nav_link text-3xl"><span className="text-green-500">A</span>dd Order</button>
-        <button onClick={() => { setOpen(false); goToViewBills(); }} className="nav_link text-3xl"><span className="text-green-500">V</span>iew Orders</button>
+        <NavLink to="/" className="nav_link text-3xl border-b-2 py-3! border-[#7c7c7c]" onClick={() => setOpen(false)}><span className="text-green-500">H</span>ome</NavLink>
+        <button onClick={() => { setOpen(false); goToAddBill(); }} className="nav_link text-3xl border-b-2 py-3! border-[#7c7c7c]"><span className="text-green-500">A</span>dd Order</button>
+        <button onClick={() => { setOpen(false); goToViewBills(); }} className="nav_link text-3xl border-b-2 py-3! border-[#7c7c7c]"><span className="text-green-500">V</span>iew Orders</button>
 
         {isLoggedIn() && role === "admin" && (
           <button
             onClick={() => { setOpen(false); navigate("/admin"); }}
-            className="nav_line-2 text-3xl"
+            className="nav_line-2 text-3xl border-b-2 py-3! border-[#7c7c7c]"
           >
             <span className="text-amber-500">A</span>dmin
           </button>
@@ -141,14 +141,14 @@ const Navbar = () => {
               >
                 {getInitials()}
               </button>
-              <button onClick={() => { setOpen(false); handleLogout(); }} className="nav_link"><span className="text-red-500">L</span>
+              <button onClick={() => { setOpen(false); handleLogout(); }} className="nav_link border-b-2 py-3! border-[#7c7c7c]"><span className="text-red-500">L</span>
                 ogout
               </button>
             </>
           ) : (
             <div className="flex gap-8">
-              <NavLink to="/login" className="nav_link" onClick={() => setOpen(false)}><span className="text-green-500">L</span>ogin</NavLink>
-              <NavLink to="/signup" className="nav_link" onClick={() => setOpen(false)}><span className="text-green-500">S</span>ign Up</NavLink>
+              <NavLink to="/login" className="nav_link" onClick={() => setOpen(false)}><span className="text-green-500 border-b-2 py-3! border-[#7c7c7c]">L</span>ogin</NavLink>
+              <NavLink to="/signup" className="nav_link" onClick={() => setOpen(false)}><span className="text-green-500 border-b-2 py-3! border-[#7c7c7c]">S</span>ign Up</NavLink>
             </div>
           )}
         </div>
