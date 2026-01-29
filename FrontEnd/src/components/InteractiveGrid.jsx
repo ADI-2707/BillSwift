@@ -18,7 +18,7 @@ const InteractiveGrid = () => {
             style={{
               animationDelay: item.cubeDelay,
               bottom: `${index * 80 + 40}px`, 
-              left: '65%',
+              left: '80%',
               marginLeft: '-64px',
               zIndex: index, 
             }}
