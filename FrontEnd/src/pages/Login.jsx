@@ -31,7 +31,6 @@ const Login = () => {
         password: form.password,
       });
 
-      // Store token + user role in storage
       localStorage.setItem("token", res.data.access_token);
       localStorage.setItem("role",res.data.role);
       localStorage.setItem("userEmail", res.data.email);
@@ -39,7 +38,6 @@ const Login = () => {
       const displayName = res.data.name || res.data.first_name ? `${res.data.first_name} ${res.data.last_name}` : res.data.email;
       localStorage.setItem("userName", displayName);
 
-      // Navigate admin → admin panel, others → bill page
       if (res.data.role === "admin") {
         navigate("/admin");
       } else {
@@ -82,7 +80,6 @@ const Login = () => {
           </p>
         )}
 
-        {/* EMAIL */}
         <div className="flex flex-col w-full gap-2 mt-4">
           <label className="text-white text-sm text-start">Email</label>
           <input
@@ -94,7 +91,6 @@ const Login = () => {
           />
         </div>
 
-        {/* PASSWORD */}
         <div className="flex flex-col w-full gap-2">
           <label className="text-white text-sm text-start">Password</label>
           <input
@@ -106,7 +102,6 @@ const Login = () => {
           />
         </div>
 
-        {/* LOGIN BUTTON */}
         <button
           onClick={handleLogin}
           className="primary-action-btn-1"

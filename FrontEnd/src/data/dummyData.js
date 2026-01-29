@@ -1,4 +1,3 @@
-// ===================== USERS ==========================
 export const usersDB = [
   {
     id: 1,
@@ -45,7 +44,6 @@ export const usersDB = [
   }
 ];
 
-// ===================== DEVICE DATA ==========================
 export const deviceTypes = [
   "Drives",
   "Motors",

@@ -13,10 +13,8 @@ body {
   padding-left: 3rem !important;
 }
 
-/* NAVBAR BASE CONTAINER */
 .navbar-container {
   @apply flex justify-between items-center mx-auto my-6 px-6 py-3 rounded-full backdrop-blur-lg bg-white/5 border border-white/10 transition-all duration-300;
-  /* Responsiveness: 95% width on mobile/tablet, 85% on large, max-width on huge screens */
   width: 92vw;
   max-width: 1280px;
 }
@@ -28,7 +26,6 @@ body {
   }
 }
 
-/* NAV LINKS */
 .nav_link {
   @apply relative py-1 px-2 transition-all duration-300 ease-in-out;
 }
@@ -68,37 +65,30 @@ body {
   @apply w-full;
 }
 
-/* ACCOUNT CIRCLE */
 .account-circle {
   @apply flex items-center justify-center h-10 w-10 rounded-full bg-green-600 text-white font-bold cursor-pointer border border-white hover:border-2 hover:bg-green-700 transition-all active:scale-95 duration-200;
 }
 
-/* PREVENT SCROLL WHEN MOBILE MENU OPEN (Optional: logic needed in JS to toggle class on body) */
 .no-scroll {
   overflow: hidden;
 }
-
-/* HOME PAGE SPECIFIC STYLES */
 
 .home-wrapper {
   @apply min-h-screen bg-transparent text-white font-sans pb-20 mt-10 md:mt-16;
 }
 
-/* CARDS: Grow with screen, but stay centered on mobile */
 .home-card {
-  @apply flex flex-col bg-[#0a0a0a]/80 border border-white/10 rounded-3xl p-6 sm:p-10 w-full max-w-md lg:max-w-lg shadow-2xl backdrop-blur-sm transition-all duration-500;
+  @apply flex flex-col rounded-3xl p-6 sm:p-10 w-full max-w-md lg:max-w-lg shadow-2xl backdrop-blur-sm transition-all duration-500;
 }
 
 .home-card:hover {
   @apply border-white/20 shadow-green-900/10;
 }
 
-/* ERROR BOXES */
 .error-box {
   @apply mb-4 text-red-500 text-xs bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2 text-center;
 }
 
-/* INPUTS & SELECTS */
 .search-input-container {
   @apply flex items-center w-full bg-black/40 border border-white/10 px-4 py-1 rounded-2xl focus-within:border-green-500/50 transition-all;
 }
@@ -119,7 +109,6 @@ body {
   @apply bg-transparent outline-none placeholder-gray-600 w-full py-3 text-sm focus:text-white;
 }
 
-/* BUTTONS */
 .primary-action-btn {
   @apply mt-4 bg-red-600 hover:bg-red-500 text-white font-black py-4 rounded-xl shadow-xl transition-all active:scale-95 uppercase tracking-widest text-xs cursor-pointer;
 }
@@ -128,7 +117,6 @@ body {
   @apply mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 w-32 rounded-lg shadow-xl transition-all active:scale-95 cursor-pointer;
 }
 
-/* Scrollbar styling for the component search results */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -143,7 +131,6 @@ body {
   background: #444;
 }
 
-/* Transitions for the order cards */
 .group {
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -152,41 +139,35 @@ body {
   transform: translateY(-8px);
 }
 
-/* Enhancing the mono font readability */
 .font-mono {
   font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular,
     monospace;
 }
 
-/* Ensuring buttons have a consistent tracking for the uppercase style */
 button.uppercase {
   letter-spacing: 0.15em;
 }
 
-/* Custom shadow for green hover state */
 .hover\:shadow-green-900\/10:hover {
   box-shadow: 0 20px 25px -5px rgba(22, 101, 52, 0.1),
     0 10px 10px -5px rgba(22, 101, 52, 0.04);
 }
 
-/* Media Query for scaling container width on large screens */
 @media (min-width: 1536px) {
   .max-w-6xl {
     max-width: 1440px;
   }
 }
 
-/* ACCOUNT PAGE DATE INPUT FIX */
 input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1) brightness(0.5); /* Makes the calendar icon visible on dark bg */
+  filter: invert(1) brightness(0.5);
   cursor: pointer;
 }
 
 input[type="date"] {
-  color-scheme: dark; /* Standard modern way to style date pickers for dark mode */
+  color-scheme: dark;
 }
 
-/* Ensure the table scrollbar isn't ugly on mobile */
 .overflow-x-auto::-webkit-scrollbar {
   height: 4px;
 }
@@ -196,12 +177,10 @@ input[type="date"] {
   border-radius: 10px;
 }
 
-/* 1. Force the native text and internal UI to be light/visible */
 input[type="date"] {
   color-scheme: dark;
 }
 
-/* 2. The "Magic" fix: Stretch the native picker trigger to cover the whole input */
 input[type="date"]::-webkit-calendar-picker-indicator {
   position: absolute;
   top: 0;
@@ -215,36 +194,30 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   background: transparent;
   color: transparent;
-  /* This ensures the Lucide icon underneath is still visible but the click hits the trigger */
   opacity: 0;
 }
 
-/* 3. Ensure the custom class handles text placement so it doesn't hit your icon */
 .date-input-custom {
   position: relative;
   padding-left: 3rem !important;
 }
 
-/* Ensure the dashboard container doesn't overflow on small screens */
 @media (max-width: 768px) {
   .flex-1 {
     width: 100%;
   }
 }
 
-/* Fix for the gradient text (Tailwind v4 uses bg-gradient-to-r, not bg-linear-to-r) */
 .bg-gradient-to-r {
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
 }
 
-/* Fix for the table containers to allow horizontal scroll without breaking the layout */
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(16, 185, 129, 0.2) transparent;
 }
 
-/* Ensure background gradient text works on all browsers */
 .bg-gradient-to-r {
   background-image: linear-gradient(
     to right,
@@ -252,7 +225,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   );
 }
 
-/* Custom scrollbar for the table overflow */
 .overflow-x-auto::-webkit-scrollbar {
   height: 6px;
 }
@@ -262,25 +234,21 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-radius: 10px;
 }
 
-/* Mobile specific padding for the main wrapper */
 @media (max-width: 768px) {
   .mt-10 {
-    margin-top: 1.5rem; /* Reduce top margin on small screens */
+    margin-top: 1.5rem;
   }
 }
 
-/* Ensure the main dashboard area has a smooth scroll experience */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
-/* Fix for overlapping dropdowns - ensures they stay above all other elements */
 .z-\[100\] {
   z-index: 100 !important;
 }
 
-/* Ensure numbers don't show increment arrows for cleaner UI */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -290,7 +258,6 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-/* Pulse animation for the search loader */
 @keyframes pulse {
   0%,
   100% {
@@ -304,7 +271,6 @@ input[type="number"] {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Ensure the horizontal scroll bar for the table looks clean on mobile */
 .overflow-x-auto {
   scrollbar-width: thin;
   scrollbar-color: rgba(16, 185, 129, 0.2) transparent;
@@ -319,12 +285,10 @@ input[type="number"] {
   border-radius: 10px;
 }
 
-/* Fix for background-clip-text on some browsers */
 .bg-clip-text {
   -webkit-background-clip: text;
 }
 
-/* Smooth custom scrollbar for the main content area */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -333,7 +297,6 @@ input[type="number"] {
   border-radius: 10px;
 }
 
-/* Shake animation for errors */
 @keyframes shake {
   0%,
   100% {
@@ -351,13 +314,11 @@ input[type="number"] {
   animation: shake 0.2s ease-in-out 0s 2;
 }
 
-/* Ensure password dots look consistent in the input */
 input[type="password"] {
   font-family: caption;
   letter-spacing: 0.2em;
 }
 
-/* Override for placeholder dots spacing */
 input[type="password"]::placeholder {
   letter-spacing: normal;
   font-family: inherit;
@@ -370,3 +331,53 @@ input[type="password"]::placeholder {
 .custom-heading {
   @apply font-black tracking-tight bg-linear-to-r from-white to-gray-500 bg-clip-text leading-tight text-transparent;
 }
+
+@keyframes float-in {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes label-reveal {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.cube-animate {
+  animation: float-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.label-animate {
+  opacity: 0; 
+  animation: label-reveal 0.6s ease-out both;
+}
+
+.cube-container {
+  transform-style: preserve-3d;
+  transform: rotateX(-30deg) rotateY(45deg);
+}
+
+.cube-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.cube-face-front  { transform: translateZ(32px); }
+.cube-face-back   { transform: rotateY(180deg) translateZ(32px); }
+.cube-face-right  { transform: rotateY(90deg) translateZ(32px); }
+.cube-face-left   { transform: rotateY(-90deg) translateZ(32px); }
+.cube-face-top    { transform: rotateX(90deg) translateZ(32px); }
+.cube-face-bottom { transform: rotateX(-90deg) translateZ(32px); }

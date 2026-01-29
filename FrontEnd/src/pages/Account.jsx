@@ -10,8 +10,6 @@ const Account = () => {
   const [user, setUser] = useState(null);
   const [bills, setBills] = useState([]);
   const [error, setError] = useState("");
-  
-  // Filtering & Sorting States
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [sortType, setSortType] = useState("date"); 
@@ -53,18 +51,15 @@ const Account = () => {
     navigate("/add-bill", { state: { billId } });
   };
 
-  // Logic for Searching, Filtering, Sorting, and LIMITING
   const filteredAndSortedBills = useMemo(() => {
     let result = [...bills];
 
-    // 1. Search Filter
     if (searchQuery) {
       result = result.filter((b) =>
         b.bill_number.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // 2. Exact Date Filter
     if (dateFilter) {
       result = result.filter((b) => {
         const billDate = new Date(b.created_at).toISOString().split("T")[0];
@@ -72,7 +67,6 @@ const Account = () => {
       });
     }
 
-    // 3. Sorting Logic
     result.sort((a, b) => {
       if (sortType === "price") {
         const amountA = parseFloat(a.total_amount);
@@ -85,7 +79,6 @@ const Account = () => {
       }
     });
 
-    // 4. LIMIT TO 20 RECORDS
     return result.slice(0, 20);
   }, [bills, searchQuery, dateFilter, sortType, priceSortOrder, dateSortOrder]);
 
@@ -135,7 +128,6 @@ const Account = () => {
             <Receipt className="w-5 h-5 text-emerald-500" />
             Billing Activity
           </h2>
-          {/* UPDATED COUNTER LOGIC */}
           <span className="text-[10px] font-black bg-white/5 text-slate-400 px-4 py-2 rounded-full border border-white/10 uppercase tracking-widest">
             Showing {filteredAndSortedBills.length} / {bills.length} Records
           </span>

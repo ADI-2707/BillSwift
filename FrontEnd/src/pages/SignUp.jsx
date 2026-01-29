@@ -55,13 +55,11 @@ const Signup = () => {
   return (
     <>
       <div className="flex flex-col items-center mt-20 text-center">
-        {/* PAGE HEADING */}
         <h1 className="text-5xl font-bold">
           Sign up for your <span className="text-red-600">B</span>ill
           <span className="text-red-600">Swift</span> account
         </h1>
 
-        {/* CARD */}
         <div className="flex flex-col gap-4 items-center border border-green-900/60 bg-white/2 rounded-xl px-6 py-6 w-full max-w-md mt-20">
           <h1 className="text-lg font-bold text-white">
             <span className="text-green-600 font-bold text-lg">S</span>IGN UP
@@ -74,14 +72,12 @@ const Signup = () => {
             </Link>
           </p>
 
-          {/* ERROR BOX */}
           {error && (
             <p className="text-red-500 text-sm bg-red-500/10 border border-red-500/40 rounded px-2 py-1 w-full text-center">
               {error}
             </p>
           )}
 
-          {/* FIRST NAME */}
           <div className="flex flex-col w-full gap-2">
             <label className="text-white text-sm text-start">First Name</label>
             <input
@@ -93,7 +89,6 @@ const Signup = () => {
             />
           </div>
 
-          {/* LAST NAME */}
           <div className="flex flex-col w-full gap-2">
             <label className="text-white text-sm text-start">Last Name</label>
             <input
@@ -105,7 +100,6 @@ const Signup = () => {
             />
           </div>
 
-          {/* EMPLOYEE CODE */}
           <div className="flex flex-col w-full gap-2">
             <label className="text-white text-sm text-start">Employee Code</label>
             <input
@@ -117,7 +111,6 @@ const Signup = () => {
             />
           </div>
 
-          {/* TEAM SELECT */}
           <div className="flex flex-col w-full gap-2">
             <label className="text-white text-sm text-start">Team</label>
             <select
@@ -133,7 +126,6 @@ const Signup = () => {
             </select>
           </div>
 
-          {/* EMAIL */}
           <div className="flex flex-col w-full gap-2">
             <label className="text-white text-sm text-start">Email</label>
             <input
@@ -145,7 +137,6 @@ const Signup = () => {
             />
           </div>
 
-          {/* PASSWORD */}
           <div className="flex flex-col w-full gap-2">
             <label className="text-white text-sm text-start">Password</label>
             <input
@@ -157,7 +148,6 @@ const Signup = () => {
             />
           </div>
 
-          {/* CONFIRM PASSWORD */}
           <div className="flex flex-col w-full gap-2">
             <label className="text-white text-sm text-start">Confirm Password</label>
             <input
@@ -169,7 +159,6 @@ const Signup = () => {
             />
           </div>
 
-          {/* SIGNUP BUTTON */}
           <button
             onClick={handleSignup}
             className="primary-action-btn-1"

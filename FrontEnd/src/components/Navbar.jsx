@@ -44,9 +44,8 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Main Navbar Container */}
       <nav className="navbar-container">
-        {/* LOGO */}
+
         <Link to="/" className="flex items-center">
           <img
             src="/BillSwift.svg"
@@ -55,7 +54,6 @@ const Navbar = () => {
           />
         </Link>
 
-        {/* DESKTOP NAV LINKS - Now shows only on LG (1024px) and up */}
         <div className="hidden lg:flex gap-6 xl:gap-12 text-lg xl:text-xl items-center">
           <NavLink to="/" className="nav_link">
             <span className="text-green-600">H</span>ome
@@ -68,7 +66,6 @@ const Navbar = () => {
           </button>
         </div>
 
-        {/* AUTH SECTION - Desktop */}
         <div className="hidden lg:flex gap-4 xl:gap-8 text-lg xl:text-xl items-center">
           {isLoggedIn() ? (
             <>
@@ -100,7 +97,6 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* MOBILE MENU ICON - Shows on everything smaller than LG (Tablet/Mobile) */}
         <button
           className="lg:hidden text-white text-3xl focus:outline-none"
           onClick={() => setOpen(true)}
@@ -109,7 +105,6 @@ const Navbar = () => {
         </button>
       </nav>
 
-      {/* MOBILE/TABLET OVERLAY MENU */}
       <div
         className={`fixed inset-0 bg-[#111]/85 backdrop-blur-xl z-50 flex flex-col items-center justify-center gap-8 text-2xl transition-all duration-300 ${
           open ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"

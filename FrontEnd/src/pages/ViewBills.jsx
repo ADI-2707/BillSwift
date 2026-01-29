@@ -11,8 +11,7 @@ const ViewBills = () => {
 
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
-  
-  // Memoize headers to prevent unnecessary re-renders
+
   const authHeaders = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
   const fetchBills = async () => {
@@ -40,7 +39,6 @@ const ViewBills = () => {
     }
 
     fetchBills();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, token, role]);
 
   const deleteBillFromUI = (billId) => {
@@ -95,7 +93,6 @@ const ViewBills = () => {
                 key={bill.id} 
                 className="group flex flex-col bg-[#0a0a0a]/80 border border-white/10 rounded-3xl overflow-hidden shadow-2xl hover:border-green-500/40 hover:shadow-green-900/10 transition-all duration-500 backdrop-blur-sm"
               >
-                {/* Card Header */}
                 <div className="bg-white/5 p-5 border-b border-white/5 flex justify-between items-center">
                   <span className="font-mono text-[10px] text-gray-500 tracking-widest uppercase group-hover:text-green-500 transition-colors">
                     ID: {bill.bill_number}
@@ -111,7 +108,6 @@ const ViewBills = () => {
                   </span>
                 </div>
 
-                {/* Card Body */}
                 <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between">
                   <div className="mb-8">
                     <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">Total Amount</p>
@@ -123,7 +119,6 @@ const ViewBills = () => {
                     </div>
                   </div>
 
-                  {/* Actions */}
                   <div className="flex flex-col gap-3">
                     <button
                       onClick={() => openBill(bill.id)}

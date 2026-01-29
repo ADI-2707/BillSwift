@@ -30,7 +30,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <nav className="flex flex-col gap-3">
           {[
             { to: "/admin", icon: <FiHome />, label: "Dashboard", end: true },
-            { to: "/admin/pending-users", icon: <FiUserCheck />, label: "Users" }, // Label Updated
+            { to: "/admin/pending-users", icon: <FiUserCheck />, label: "Users" },
             { to: "/admin/components", icon: <FiLayers />, label: "Components" },
             { to: "/admin/products", icon: <FiBox />, label: "Products" },
             { to: "/admin/bills", icon: <FiFileText />, label: "Orders" },

@@ -13,7 +13,6 @@ const AdminNavbar = ({ toggleSidebar }) => {
   return (
     <header className="h-14 bg-black/70 border-b border-white/10 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 backdrop-blur-md">
       <div className="flex items-center gap-3">
-        {/* Hamburger Menu - Only visible on mobile */}
         <button 
           onClick={toggleSidebar} 
           className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition"

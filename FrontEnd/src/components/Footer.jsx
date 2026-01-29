@@ -2,8 +2,6 @@ const Footer = () => {
   return (
     <footer className="w-full mt-16 py-10 text-center border-t border-white/10 bg-transparent backdrop-blur-md">
       <div className="flex flex-col items-center gap-2">
-        
-        {/* APP NAME */}
         <h2 className="text-xl font-bold text-white tracking-wide flex items-center gap-1">
           <img
             src="/BillSwift_logo.svg"
@@ -16,13 +14,11 @@ const Footer = () => {
           </span>
         </h2>
 
-        {/* TAGLINE */}
         <p className="text-gray-400 text-sm italic">
           Your Billing Buddy ⚡ — Because time is money and bills hate wasting
           it.
         </p>
 
-        {/* AUTHOR */}
         <p className="text-gray-500 text-xs mt-1">
           Built by{" "}
           <span className="text-green-500 font-semibold">Aditya Singh</span>

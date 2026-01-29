@@ -11,7 +11,6 @@ const AddBill = () => {
   const isReadOnly = location.state?.readOnly || false;
   const autoAddStarter = location.state?.autoAddStarter;
   const autoAddRating = location.state?.autoAddRating;
-
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
@@ -20,7 +19,6 @@ const AddBill = () => {
   const [allComponents, setAllComponents] = useState([]);
   const [expandedBundleIds, setExpandedBundleIds] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [starterFilter, setStarterFilter] = useState("");
   const [ratingFilter, setRatingFilter] = useState("");
   const [billDiscountPercent, setBillDiscountPercent] = useState(0);
@@ -28,8 +26,6 @@ const AddBill = () => {
   const [activeBundleId, setActiveBundleId] = useState(null);
 
   const authHeaders = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
-
-  /* ---------------- HELPERS ---------------- */
 
   const recalcBundle = useCallback((bundle) => {
     const components = bundle.components.map((c) => {
@@ -81,8 +77,6 @@ const AddBill = () => {
     setBillBundles(prev => [...prev, newBundle]);
     setExpandedBundleIds(prev => [...prev, newId]);
   }, [recalcBundle]);
-
-  /* ---------------- INIT ---------------- */
 
   useEffect(() => {
     if (!token) return navigate("/login");
@@ -136,7 +130,6 @@ const AddBill = () => {
           const discPercent = (billData.discount_amount / billData.subtotal_amount) * 100;
           setBillDiscountPercent(Math.round(discPercent) || 0);
         } else if (autoAddStarter && autoAddRating) {
-          // If navigated from home page with starter info
           handleAddBundleInternal(autoAddStarter, autoAddRating, products);
         }
       } catch (err) {
@@ -147,8 +140,6 @@ const AddBill = () => {
     };
     fetchData();
   }, [navigate, token, role, authHeaders, editBillId, autoAddStarter, autoAddRating, handleAddBundleInternal]);
-
-  /* ---------------- HANDLERS ---------------- */
 
   const handleAddBundle = () => {
     handleAddBundleInternal(starterFilter, ratingFilter, allBundles);

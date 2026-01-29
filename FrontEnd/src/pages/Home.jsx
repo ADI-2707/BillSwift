@@ -66,7 +66,6 @@ const Home = () => {
     const billId = query.trim();
 
     try {
-      // We fetch to verify it exists, then navigate to add-bill in read-only mode
       await axios.get(`${API_URL}/billing/${billId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -80,7 +79,6 @@ const Home = () => {
         if (typeof errorDetail === 'string') {
           setSearchError(errorDetail);
         } else if (Array.isArray(errorDetail)) {
-          // If it's a validation array, grab the first message
           setSearchError(errorDetail[0]?.msg || "Validation error");
         } else if (typeof errorDetail === 'object' && errorDetail !== null) {
           setSearchError(JSON.stringify(errorDetail));
@@ -100,7 +98,6 @@ const Home = () => {
       return setFilterError("Please select both starter type and rating.");
     }
 
-    // Redirect to add-bill and pass the selection to be auto-added
     navigate("/add-bill", {
       state: { autoAddStarter: product, autoAddRating: rating },
     });
@@ -128,7 +125,7 @@ const Home = () => {
         <div className="flex justify-center items-start">
           <div className="home-card group">
             {token ? (
-              <>
+              <div className="">
                 <h1 className="text-xl font-black tracking-widest text-center mb-6">
                   <span className="text-green-500">O</span>RDERS
                 </h1>
@@ -193,7 +190,7 @@ const Home = () => {
                     Create Order
                   </button>
                 </div>
-              </>
+              </div>
             ) : (
               <div className="flex items-center justify-center p-4 min-h-[300px]">
                 <InteractiveGrid />
@@ -203,7 +200,7 @@ const Home = () => {
         </div>
 
         <div className="flex justify-center items-start">
-          <div className="home-card">
+          <div className="home-card border border-white/20">
             {!token ? (
               <>
                 <h1 className="text-xl font-black tracking-widest text-center mb-6">

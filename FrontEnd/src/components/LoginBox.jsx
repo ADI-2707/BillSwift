@@ -33,7 +33,6 @@ const Login = () => {
       return;
     }
 
-    // Save logged user
     localStorage.setItem("loggedUser", JSON.stringify(user));
 
     navigate("/view-bills");
@@ -60,14 +59,12 @@ const Login = () => {
           </Link>
         </p>
 
-        {/* ERROR BOX */}
         {error && (
           <p className="text-red-500 text-sm bg-red-500/10 border border-red-500/40 rounded px-2 py-1 w-full text-center">
             {error}
           </p>
         )}
 
-        {/* EMAIL */}
         <div className="flex flex-col w-full gap-2 mt-4">
           <label className="text-white text-sm text-start">Email</label>
           <input
@@ -79,7 +76,6 @@ const Login = () => {
           />
         </div>
 
-        {/* PASSWORD */}
         <div className="flex flex-col w-full gap-2">
           <label className="text-white text-sm text-start">Password</label>
           <input
@@ -91,7 +87,6 @@ const Login = () => {
           />
         </div>
 
-        {/* LOGIN BUTTON */}
         <button
           onClick={handleLogin}
           className="bg-red-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-700 active:scale-95 transition duration-150 mt-2 w-32 cursor-pointer"
