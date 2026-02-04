@@ -105,7 +105,7 @@ const Home = () => {
 
   return (
     <div className="home-wrapper">
-      <div className="text-center pt-10 md:pt-20 mb-8 md:mb-16 px-4">
+      <div className="text-center pt-6 md:pt-10 mb-8 md:mb-14 px-4">
         <h2 className="text-4xl sm:text-5xl lg:text-7xl mb-6 custom-heading">
           Manage Bills & Orders Faster with{" "}
           <br className="hidden lg:block" />
@@ -122,7 +122,7 @@ const Home = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 relative">
         <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px bg-white/10"></div>
 
-        <div className="flex justify-center items-start">
+        <div className="flex justify-center items-center">
           <div className="home-card group">
             {token ? (
               <div className="">
@@ -192,14 +192,14 @@ const Home = () => {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-center p-4 min-h-[300px]">
+              
                 <InteractiveGrid />
-              </div>
+           
             )}
           </div>
         </div>
 
-        <div className="flex justify-center items-start">
+        <div className="flex justify-center items-center">
           <div className="home-card border border-white/20">
             {!token ? (
               <>
